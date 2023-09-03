@@ -1,16 +1,18 @@
 [package]
+authors = ["ārXāngēl <lavrenyk@gmail.com>"]
 edition = "2021"
 name = "zero2prod"
 version = "0.1.0"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+path = "src/lib.rs"
 
-[target.x86_64-apple-darwin]
-rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/zld"]
-
-[target.aarch64-apple-darwin]
-rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/zld"]
+[[bin]]
+name = "zero2prod"
+path = "src/main.rs"
 
 [dependencies]
 actix-web = "4.4.0"
+reqwest = "0.11.20"
+serde = {version = "1.0.88", features = ["derive"]}
 tokio = {version = "1.32.0", features = ["macros", "rt-multi-thread"]}
