@@ -14,6 +14,22 @@ pub struct DatabaseSettings {
     pub database_name: String,
 }
 
+impl DatabaseSettings {
+    pub fn connection_string(&self) -> String {
+        format!(
+            "postgres://{}:{}@{}:{}/{}",
+            self.username, self.password, self.host, self.port, self.database_name
+        )
+    }
+
+    pub fn connection_string_without_db(&self) -> String {
+        format!(
+            "postgres://{}:{}@{}:{}",
+            self.username, self.password, self.host, self.port
+        )
+    }
+}
+
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     // Initialize our configuration reader
     let settings = config::Config::builder()
@@ -26,13 +42,4 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     // Try to convert the configuration values it read into
     // our Settings type
     settings.try_deserialize::<Settings>()
-}
-
-impl DatabaseSettings {
-    pub fn connection_string(&self) -> String {
-        format!(
-            "postgres://{}:{}@{}:{}/{}",
-            self.username, self.password, self.host, self.port, self.database_name
-        )
-    }
 }
