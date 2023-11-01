@@ -14,46 +14,46 @@ pub struct Field {
 }
 
 pub async fn get_animal_by_period(data: web::Query<Field>) -> HttpResponse {
-    // let body = json!(
-    //   [
-    //     {
-    //       "count": 31990,
-    //       "kind_id": 1,
-    //       "view": "КРС",
-    //       "name": "Крупный рогатый скот"
-    //     },
-    //     {
-    //       "count": 23,
-    //       "kind_id": 2,
-    //       "view": "Свинья",
-    //       "name": "Свинья"
-    //     },
-    //     {
-    //       "count": 17,
-    //       "kind_id": 3,
-    //       "view": "Лошади",
-    //       "name": "Лошади"
-    //     },
-    //     {
-    //       "count": 10,
-    //       "kind_id": 7,
-    //       "view": "Олени",
-    //       "name": "Олени"
-    //     },
-    //     {
-    //       "count": 49,
-    //       "kind_id": 12,
-    //       "view": "Овцы",
-    //       "name": "Овцы"
-    //     },
-    //     {
-    //       "count": 138,
-    //       "kind_id": 13,
-    //       "view": "Козы",
-    //       "name": "Козы"
-    //     }
-    //   ]
-    // );
+    let body = json!(
+      [
+        {
+          "count": 31990,
+          "kind_id": 1,
+          "view": "КРС",
+          "name": "Крупный рогатый скот"
+        },
+        {
+          "count": 23,
+          "kind_id": 2,
+          "view": "Свинья",
+          "name": "Свинья"
+        },
+        {
+          "count": 17,
+          "kind_id": 3,
+          "view": "Лошади",
+          "name": "Лошади"
+        },
+        {
+          "count": 10,
+          "kind_id": 7,
+          "view": "Олени",
+          "name": "Олени"
+        },
+        {
+          "count": 49,
+          "kind_id": 12,
+          "view": "Овцы",
+          "name": "Овцы"
+        },
+        {
+          "count": 138,
+          "kind_id": 13,
+          "view": "Козы",
+          "name": "Козы"
+        }
+      ]
+    );
 
     let json_message = json!({
         "region_id": data.region_id,
@@ -69,5 +69,5 @@ pub async fn get_animal_by_period(data: web::Query<Field>) -> HttpResponse {
 
     HttpResponse::Ok()
         .content_type("application/json")
-        .json(json_message)
+        .json(body)
 }
