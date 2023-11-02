@@ -1,8 +1,7 @@
 {
-    "rust-analyzer.linkedProjects": [
-        "./Cargo.toml",
-    ],
-    "cSpell.words": [
-        "chrono"
-    ]
+  "rust-analyzer.linkedProjects": ["./Cargo.toml", "./Cargo.toml"],
+  "cSpell.words": [
+    "chrono"
+  ],
+  "rust-analyzer.showUnlinkedFileNotification": false
 }
