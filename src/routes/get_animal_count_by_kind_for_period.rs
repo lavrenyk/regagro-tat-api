@@ -1,3 +1,4 @@
+
 //! src/routes/api/analytics/animals/get_animal_by_kind_for_period.rs
 
 use actix_web::{web, HttpResponse};
