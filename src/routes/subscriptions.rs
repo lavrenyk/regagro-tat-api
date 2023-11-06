@@ -1,7 +1,7 @@
 //! src/routes/subscriptions.rs
 
 use actix_web::{web, HttpResponse};
-use chrono::Utc;
+// use chrono::Utc;
 use sqlx::MySqlPool;
 use tracing::Instrument;
 use uuid::Uuid;
@@ -22,7 +22,7 @@ pub async fn subscribe(form: web::Form<FormData>, pool: web::Data<MySqlPool>) ->
     );
     let _request_span_guard = request_span.enter();
     let query_span = tracing::info_span!("Saving new subscriber details in the database.");
-    let timestamp = Utc::now();
+    // let timestamp = Utc::now();
     // match sqlx::query!(
     //     r#"
     //     INSERT INTO subscriptions (id, email, name, subscribed_at)

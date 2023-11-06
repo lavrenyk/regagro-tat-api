@@ -1,0 +1,407 @@
+[
+    {
+        "id": 264,
+        "name": "Агрызский",
+        "view": "Агрызский",
+        "guid": "3b67dc8e-79b1-43f4-8f9e-2b4990a1a922",
+        "region_id": 16,
+        "regagro_id": 1,
+        "regagro_code": "01"
+    },
+    {
+        "id": 265,
+        "name": "Азнакаевский",
+        "view": "Азнакаевский",
+        "guid": "25108675-9fd9-4325-a1fd-c392c3feedac",
+        "region_id": 16,
+        "regagro_id": 2,
+        "regagro_code": "02"
+    },
+    {
+        "id": 266,
+        "name": "Аксубаевский",
+        "view": "Аксубаевский",
+        "guid": "c4339d8a-d4ef-42e0-be75-6bc551956e5c",
+        "region_id": 16,
+        "regagro_id": 3,
+        "regagro_code": "03"
+    },
+    {
+        "id": 267,
+        "name": "Актанышский",
+        "view": "Актанышский",
+        "guid": "bb9c86eb-30de-4b8f-9ea8-9edc71fc0488",
+        "region_id": 16,
+        "regagro_id": 4,
+        "regagro_code": "04"
+    },
+    {
+        "id": 268,
+        "name": "Алексеевский",
+        "view": "Алексеевский",
+        "guid": "f7521d33-7cf3-4f6e-bb66-d9e04912b6fc",
+        "region_id": 16,
+        "regagro_id": 5,
+        "regagro_code": "05"
+    },
+    {
+        "id": 269,
+        "name": "Алькеевский",
+        "view": "Алькеевский",
+        "guid": "1053347b-4de8-405d-970e-b42003d49916",
+        "region_id": 16,
+        "regagro_id": 6,
+        "regagro_code": "06"
+    },
+    {
+        "id": 270,
+        "name": "Альметьевский",
+        "view": "Альметьевский",
+        "guid": "b10beeff-7669-45aa-9127-b1cc9db1cc4c",
+        "region_id": 16,
+        "regagro_id": 7,
+        "regagro_code": "07"
+    },
+    {
+        "id": 271,
+        "name": "Апастовский",
+        "view": "Апастовский",
+        "guid": "67e7162e-14d0-4418-9923-a948ed6c2936",
+        "region_id": 16,
+        "regagro_id": 8,
+        "regagro_code": "08"
+    },
+    {
+        "id": 272,
+        "name": "Арский",
+        "view": "Арский",
+        "guid": "8b3bfb8a-d712-4ecd-9192-a7259ea141dc",
+        "region_id": 16,
+        "regagro_id": 9,
+        "regagro_code": "09"
+    },
+    {
+        "id": 273,
+        "name": "Атнинский",
+        "view": "Атнинский",
+        "guid": "72faa57c-6281-4758-9ba3-516558f19eab",
+        "region_id": 16,
+        "regagro_id": 10,
+        "regagro_code": "10"
+    },
+    {
+        "id": 274,
+        "name": "Бавлинский",
+        "view": "Бавлинский",
+        "guid": "a2093ccb-a5b8-4956-ad05-c0886fc95cdb",
+        "region_id": 16,
+        "regagro_id": 11,
+        "regagro_code": "11"
+    },
+    {
+        "id": 275,
+        "name": "Балтасинский",
+        "view": "Балтасинский",
+        "guid": "7fca8877-4ce1-443d-b64b-7bf6fb84198a",
+        "region_id": 16,
+        "regagro_id": 12,
+        "regagro_code": "12"
+    },
+    {
+        "id": 276,
+        "name": "Бугульминский",
+        "view": "Бугульминский",
+        "guid": "c4fc378d-08d2-4adc-851f-fe35335e6bc8",
+        "region_id": 16,
+        "regagro_id": 13,
+        "regagro_code": "13"
+    },
+    {
+        "id": 277,
+        "name": "Буинский",
+        "view": "Буинский",
+        "guid": "2f40b5af-a9f6-4056-8581-48c9d5c44e7e",
+        "region_id": 16,
+        "regagro_id": 14,
+        "regagro_code": "14"
+    },
+    {
+        "id": 278,
+        "name": "Верхнеуслонский",
+        "view": "Верхнеуслонский",
+        "guid": "6c1c7db4-37b3-4544-9a47-255c02207388",
+        "region_id": 16,
+        "regagro_id": 15,
+        "regagro_code": "15"
+    },
+    {
+        "id": 279,
+        "name": "Высокогорский",
+        "view": "Высокогорский",
+        "guid": "56197a9f-2b30-486d-b31a-21d93c589bb7",
+        "region_id": 16,
+        "regagro_id": 16,
+        "regagro_code": "16"
+    },
+    {
+        "id": 280,
+        "name": "Дрожжановский",
+        "view": "Дрожжановский",
+        "guid": "a22f07cb-1481-4278-8182-e342b2f0785d",
+        "region_id": 16,
+        "regagro_id": 17,
+        "regagro_code": "17"
+    },
+    {
+        "id": 281,
+        "name": "Елабужский",
+        "view": "Елабужский",
+        "guid": "ac240902-34b0-491c-896b-af76cf6fd4ac",
+        "region_id": 16,
+        "regagro_id": 18,
+        "regagro_code": "18"
+    },
+    {
+        "id": 282,
+        "name": "Заинский",
+        "view": "Заинский",
+        "guid": "3a44bebe-99e7-4e97-b79a-ea36b34e6be1",
+        "region_id": 16,
+        "regagro_id": 19,
+        "regagro_code": "19"
+    },
+    {
+        "id": 283,
+        "name": "Зеленодольский",
+        "view": "Зеленодольский",
+        "guid": "163ed231-c194-4452-ab1a-7f991b4d2f5c",
+        "region_id": 16,
+        "regagro_id": 20,
+        "regagro_code": "20"
+    },
+    {
+        "id": 284,
+        "name": "Кайбицкий",
+        "view": "Кайбицкий",
+        "guid": "cc249bd4-51d8-4bc6-bdda-340229f439d2",
+        "region_id": 16,
+        "regagro_id": 21,
+        "regagro_code": "21"
+    },
+    {
+        "id": 285,
+        "name": "Камско-Устьинский",
+        "view": "Камско-Устьинский",
+        "guid": "7e6e53c8-30d0-4d74-8749-2edb12566989",
+        "region_id": 16,
+        "regagro_id": 22,
+        "regagro_code": "22"
+    },
+    {
+        "id": 286,
+        "name": "Кукморский",
+        "view": "Кукморский",
+        "guid": "0298be6c-8d8a-4f33-b742-8b8769d86d17",
+        "region_id": 16,
+        "regagro_id": 23,
+        "regagro_code": "23"
+    },
+    {
+        "id": 287,
+        "name": "Лаишевский",
+        "view": "Лаишевский",
+        "guid": "d11bb1b1-27ae-44b6-9d0e-b6fa43f75625",
+        "region_id": 16,
+        "regagro_id": 24,
+        "regagro_code": "24"
+    },
+    {
+        "id": 288,
+        "name": "Лениногорский",
+        "view": "Лениногорский",
+        "guid": "75387230-9ca5-4239-be4d-dc4a77a2d6ab",
+        "region_id": 16,
+        "regagro_id": 25,
+        "regagro_code": "25"
+    },
+    {
+        "id": 289,
+        "name": "Мамадышский",
+        "view": "Мамадышский",
+        "guid": "fdc0d460-4cf0-4dce-9887-043d181c558e",
+        "region_id": 16,
+        "regagro_id": 26,
+        "regagro_code": "26"
+    },
+    {
+        "id": 290,
+        "name": "Менделеевский",
+        "view": "Менделеевский",
+        "guid": "d5b8fcfb-74a9-4cfa-88e6-e508cb85575b",
+        "region_id": 16,
+        "regagro_id": 27,
+        "regagro_code": "27"
+    },
+    {
+        "id": 291,
+        "name": "Мензелинский",
+        "view": "Мензелинский",
+        "guid": "72a8ac4a-7c51-4b54-be84-03c9ab3ca362",
+        "region_id": 16,
+        "regagro_id": 28,
+        "regagro_code": "28"
+    },
+    {
+        "id": 292,
+        "name": "Муслюмовский",
+        "view": "Муслюмовский",
+        "guid": "4d9587db-77da-4f96-8331-bf04599a2878",
+        "region_id": 16,
+        "regagro_id": 29,
+        "regagro_code": "29"
+    },
+    {
+        "id": 293,
+        "name": "Нижнекамский",
+        "view": "Нижнекамский",
+        "guid": "dd36813f-e9e1-482c-8e77-02397d0a3eb3",
+        "region_id": 16,
+        "regagro_id": 30,
+        "regagro_code": "30"
+    },
+    {
+        "id": 294,
+        "name": "Новошешминский",
+        "view": "Новошешминский",
+        "guid": "ffe9978a-c14a-41d8-8b21-06233b063267",
+        "region_id": 16,
+        "regagro_id": 31,
+        "regagro_code": "31"
+    },
+    {
+        "id": 295,
+        "name": "Нурлатский",
+        "view": "Нурлатский",
+        "guid": "69dd0cab-c31d-4345-8429-b8540728c484",
+        "region_id": 16,
+        "regagro_id": 32,
+        "regagro_code": "32"
+    },
+    {
+        "id": 296,
+        "name": "Пестречинский",
+        "view": "Пестречинский",
+        "guid": "64bad346-6dda-4d89-be4e-3e73b0cf1f45",
+        "region_id": 16,
+        "regagro_id": 33,
+        "regagro_code": "33"
+    },
+    {
+        "id": 297,
+        "name": "Рыбно-Слободский",
+        "view": "Рыбно-Слободский",
+        "guid": "5d20a8a2-cd23-4af0-8f66-0a509ba9e84d",
+        "region_id": 16,
+        "regagro_id": 34,
+        "regagro_code": "34"
+    },
+    {
+        "id": 298,
+        "name": "Сабинский",
+        "view": "Сабинский",
+        "guid": "d2a1137e-e196-46d3-a8f8-e7cfbb86412b",
+        "region_id": 16,
+        "regagro_id": 35,
+        "regagro_code": "35"
+    },
+    {
+        "id": 299,
+        "name": "Сармановский",
+        "view": "Сармановский",
+        "guid": "f1ca5836-fb9f-4829-9d31-e4fbb3106813",
+        "region_id": 16,
+        "regagro_id": 36,
+        "regagro_code": "36"
+    },
+    {
+        "id": 300,
+        "name": "Спасский",
+        "view": "Спасский",
+        "guid": "81b32a2d-34a6-4ef8-bc97-005c3d5d2b0e",
+        "region_id": 16,
+        "regagro_id": 37,
+        "regagro_code": "37"
+    },
+    {
+        "id": 301,
+        "name": "Тетюшский",
+        "view": "Тетюшский",
+        "guid": "ff141bdc-ba5a-4d93-ba21-f114931ee193",
+        "region_id": 16,
+        "regagro_id": 38,
+        "regagro_code": "38"
+    },
+    {
+        "id": 302,
+        "name": "Тукаевский",
+        "view": "Тукаевский",
+        "guid": "e1594936-3d9f-48d0-9699-6a313885cad1",
+        "region_id": 16,
+        "regagro_id": 39,
+        "regagro_code": "39"
+    },
+    {
+        "id": 303,
+        "name": "Тюлячинский",
+        "view": "Тюлячинский",
+        "guid": "ee0c0b9a-c5fe-4c81-a966-93b8af831441",
+        "region_id": 16,
+        "regagro_id": 40,
+        "regagro_code": "40"
+    },
+    {
+        "id": 304,
+        "name": "Черемшанский",
+        "view": "Черемшанский",
+        "guid": "75124fb3-dd85-42b7-8471-ccea65e6f60f",
+        "region_id": 16,
+        "regagro_id": 41,
+        "regagro_code": "41"
+    },
+    {
+        "id": 305,
+        "name": "Чистопольский",
+        "view": "Чистопольский",
+        "guid": "019d7b51-664b-452f-aab7-0f6a73d81dcb",
+        "region_id": 16,
+        "regagro_id": 42,
+        "regagro_code": "42"
+    },
+    {
+        "id": 306,
+        "name": "Ютазинский",
+        "view": "Ютазинский",
+        "guid": "6efefcee-49b7-403b-b719-46b80cf8d1a8",
+        "region_id": 16,
+        "regagro_id": 43,
+        "regagro_code": "43"
+    },
+    {
+        "id": 307,
+        "name": "город - Казань",
+        "view": "город - Казань",
+        "guid": "93b3df57-4c89-44df-ac42-96f05e9cd3b9",
+        "region_id": 16,
+        "regagro_id": 44,
+        "regagro_code": "44"
+    },
+    {
+        "id": 308,
+        "name": "город - Набережные Челны",
+        "view": "город - Набережные Челны",
+        "guid": "748d7afa-7407-4876-9f40-764ecdd09bbd",
+        "region_id": 16,
+        "regagro_id": 45,
+        "regagro_code": "45"
+    }
+]

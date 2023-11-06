@@ -1,72 +1,76 @@
-
 //! src/routes/api/analytics/animals/get_animal_by_kind_for_period.rs
 
+use crate::helpers::animals_filter_query;
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use sqlx::MySqlPool;
+use tracing::Instrument;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Field {
-    pub region_id: u32,
-    pub date_reg_from: String,
-    pub date_reg_to: String,
-    pub kinds: String,
-    pub districts: String,
+pub struct QueryData {
+    pub region_id: Option<u32>,
+    pub date_reg_from: Option<String>,
+    pub date_reg_to: Option<String>,
+    pub kinds: Option<String>,
+    pub districts: Option<String>,
 }
 
-pub async fn get_animal_by_period(data: web::Query<Field>) -> HttpResponse {
-    let body = json!(
-      [
-        {
-          "count": 31990,
-          "kind_id": 1,
-          "view": "КРС",
-          "name": "Крупный рогатый скот"
-        },
-        {
-          "count": 23,
-          "kind_id": 2,
-          "view": "Свинья",
-          "name": "Свинья"
-        },
-        {
-          "count": 17,
-          "kind_id": 3,
-          "view": "Лошади",
-          "name": "Лошади"
-        },
-        {
-          "count": 10,
-          "kind_id": 7,
-          "view": "Олени",
-          "name": "Олени"
-        },
-        {
-          "count": 49,
-          "kind_id": 12,
-          "view": "Овцы",
-          "name": "Овцы"
-        },
-        {
-          "count": 138,
-          "kind_id": 13,
-          "view": "Козы",
-          "name": "Козы"
+/// Generate response JSON with data for any asked kind of animal in separated data
+/// with filtered by given period and districts.
+///
+/// Data for any given kind of animal is returned in the fallowing format:
+/// * `[
+/// *    {
+/// *        "count": 31990, // u32 - amount of the filtered animal kinds in db
+/// *        "kind_id": 1,  // u8 - animal kind number
+/// *        "view": "КРС", // String - animal kind short name
+/// *        "name": "Крупный рогатый скот" // String - animal kind full name
+/// *    },
+/// *    ... // other asked kinds of animals
+/// * ]`
+pub async fn get_animal_count_by_kind_for_period(
+    data: web::Query<QueryData>,
+    pool: web::Data<MySqlPool>,
+) -> HttpResponse {
+    let request_id = Uuid::new_v4();
+    let query_span = tracing::info_span!("Requesting animals count by kinds for period");
+
+    dbg!(&data);
+
+    // ЭТАП 1: Переформатируем QueryData в необходимые данные для работы
+    // 1. Определяем количество видов в запросе. Для этого переводим данные QueryData.kinds
+    // из [`String`] в [`Vec<u8>`]
+
+    match &data.kinds {
+        Some(kinds) => {
+            let filter = animals_filter_query(kinds);
+            dbg!(filter);
         }
-      ]
-    );
+        None => println!("NOTHING!"),
+    }
 
-    let json_message = json!({
-        "region_id": data.region_id,
-        "date_reg_from": data.date_reg_from,
-        "date_reg_to": data.date_reg_to,
-        "kinds": data.kinds,
-        "districts": data.districts
-    });
+    // 2. Переводим QueryData.districts из [`String`] в [`Vec<String>`] с параллельной конвертацией
+    // числового значения в GUID региона.
 
-    println!("path data: {:?}", json_message);
+    match sqlx::query(
+        r#"
+        SELECT * FROM enterprises LIMIT 10;
+        "#,
+    )
+    .fetch_all(pool.get_ref())
+    .instrument(query_span)
+    .await
+    {
+        Ok(data) => {
+            dbg!(data.len());
+            HttpResponse::Ok().finish()
+        }
+        Err(e) => {
+            tracing::error!("{} - Failed to execute query: {:?}", request_id, e);
+            HttpResponse::InternalServerError().finish()
+        }
+    }
 
-    HttpResponse::Ok()
-        .content_type("application/json")
-        .json(body)
+    // HttpResponse::Ok().finish()
 }
