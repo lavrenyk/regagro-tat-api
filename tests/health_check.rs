@@ -1,5 +1,5 @@
 //! tests/health_checks.rs
-use sqlx::{Connection, Executor, PgConnection, PgPool};
+use sqlx::{Connection, Executor, MySqlConnection, MySqlPool};
 use std::net::TcpListener;
 use uuid::Uuid;
 use zero2prod::configuration::{get_configuration, DatabaseSettings};
@@ -13,7 +13,7 @@ use zero2prod::startup::run;
 
 pub struct TestApp {
     pub address: String,
-    pub db_pool: PgPool,
+    pub db_pool: MySqlPool,
 }
 
 /// Spin up an instance of our application
@@ -36,20 +36,30 @@ async fn spawn_app() -> TestApp {
 }
 
 /// Configuring our test db
-pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
+pub async fn configure_database(config: &DatabaseSettings) -> MySqlPool {
     // Create database
-    let mut connection = PgConnection::connect(&config.connection_string_without_db())
+    // let mut connection = MySqlConnection::connect(&config.connection_string_without_db())
+    //     .await
+    //     .expect("Failed to connect to MySql");
+    let mut connection = MySqlConnection::connect("mysql://root:kakeepoo@127.0.0.1:3306/")
         .await
-        .expect("Failed to connect to Postgres");
+        .expect("Failed to connect to MySql");
+
+    let create_db_query = format!(r#"CREATE DATABASE `{}`;"#, &config.database_name);
+
+    dbg!(&create_db_query);
+
     connection
-        .execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
+        .execute(create_db_query.as_str())
         .await
         .expect("Failed to create database");
 
+    dbg!(&config.connection_string());
+
     // Migrate database
-    let connection_pool = PgPool::connect(&config.connection_string())
+    let connection_pool = MySqlPool::connect(&config.connection_string())
         .await
-        .expect("Failed to connect to Postgres");
+        .expect("Failed to connect to MySql");
     sqlx::migrate!("./migrations")
         .run(&connection_pool)
         .await
@@ -71,67 +81,102 @@ async fn health_check_works() {
         .await
         .expect("Failed to execute request.");
 
+    let get_db_data = sqlx::query(
+        r#"
+        SELECT COUNT(*) FROM animals;
+        "#,
+    )
+    .fetch_one(&app.db_pool)
+    .await
+    .expect("Failed to get data from db");
+
+    dbg!(get_db_data);
+
     // Assert
     assert!(response.status().is_success());
     assert_eq!(Some(0), response.content_length());
 }
 
-#[tokio::test]
-async fn subscribe_returns_a_200_for_valid_form_data() {
-    // Arrange
-    let app = spawn_app().await;
-    let client = reqwest::Client::new();
+// Упрощенный тест запроса, необходимо изменить его таким образом,
+// чтобы он обрабатывал входящий запрос API
+// #[tokio::test]
+// async fn get_animals_by_period() {
+//     // Arrange
+//     let app = spawn_app().await;
+//     let client = reqwest::Client::new();
 
-    // Act
-    let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
-    let response = client
-        .post(&format!("{}/subscriptions", &app.address))
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .body(body)
-        .send()
-        .await
-        .expect("Failed to execute request.");
+//     // Act
+//     // let reqwest = "region_id=13&date_reg_from=2023-01-01&date_reg_to=2023-12-01&kinds=1,2,3,4,5,6,7,8,9,10&districts=170,171,172,173,174,175,176";
+//     let kind_id = "1".to_string();
+//     let date_reg_from = "2023-01-01".to_string();
+//     let date_reg_to = "2023-12-01".to_string();
+//     let district_code = "3b67dc8e-79b1-43f4-8f9e-2b4990a1a922".to_string();
 
-    // Assert
-    assert_eq!(200, response.status().as_u16());
+//     let get_db_data = sqlx::query!(
+//         r#"
+//         SELECT * FROM animals;
+//         "#,
+//     );
 
-    let saved = sqlx::query!("SELECT email, name FROM subscriptions",)
-        .fetch_one(&app.db_pool)
-        .await
-        .expect("Failed to fetch saved subscription");
+//     dbg!(get_db_data);
+// }
 
-    assert_eq!(saved.email, "ursula_le_guin@gmail.com");
-    assert_eq!(saved.name, "le guin");
-}
+// #[tokio::test]
+// async fn subscribe_returns_a_200_for_valid_form_data() {
+//     // Arrange
+//     let app = spawn_app().await;
+//     let client = reqwest::Client::new();
 
-#[tokio::test]
-async fn subscribe_returns_a_400_when_data_is_missing() {
-    // Arrange
-    let app = spawn_app().await;
-    let client = reqwest::Client::new();
-    let test_cases = vec![
-        ("name=le%20guin", "missing the email"),
-        ("email=ursula_le_guin%40gmail.com", "missing the name"),
-        ("", "missing both name and email"),
-    ];
+//     // Act
+//     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
+//     let response = client
+//         .post(&format!("{}/subscriptions", &app.address))
+//         .header("Content-Type", "application/x-www-form-urlencoded")
+//         .body(body)
+//         .send()
+//         .await
+//         .expect("Failed to execute request.");
 
-    for (invalid_body, error_message) in test_cases {
-        // Act
-        let response = client
-            .post(&format!("{}/subscriptions", &app.address))
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .body(invalid_body)
-            .send()
-            .await
-            .expect("Failed to execute request.");
+//     // Assert
+//     assert_eq!(200, response.status().as_u16());
 
-        // Assert
-        assert_eq!(
-            400,
-            response.status().as_u16(),
-            // Additional customized error message on test failure
-            "The API did not fail with 400 Bad Request when the payload was {}",
-            error_message
-        )
-    }
-}
+//     let saved = sqlx::query!("SELECT email, name FROM subscriptions",)
+//         .fetch_one(&app.db_pool)
+//         .await
+//         .expect("Failed to fetch saved subscription");
+
+//     assert_eq!(saved.email, "ursula_le_guin@gmail.com");
+//     assert_eq!(saved.name, "le guin");
+// }
+
+// #[tokio::test]
+// async fn subscribe_returns_a_400_when_data_is_missing() {
+//     // Arrange
+//     let app = spawn_app().await;
+//     let client = reqwest::Client::new();
+//     let test_cases = vec![
+//         ("name=le%20guin", "missing the email"),
+//         ("email=ursula_le_guin%40gmail.com", "missing the name"),
+//         ("", "missing both name and email"),
+//     ];
+
+//     for (invalid_body, error_message) in test_cases {
+//         // Act
+//         let response = client
+//             .post(&format!("{}/subscriptions", &app.address))
+//             .header("Content-Type", "application/x-www-form-urlencoded")
+//             .body(invalid_body)
+//             .send()
+//             .await
+//             .expect("Failed to execute request.");
+
+//         // Assert
+//         assert_eq!(
+//             400,
+//             response.status().as_u16(),
+//             // Additional customized error message on test failure
+//             "The API did not fail with 400 Bad Request when the payload was {}",
+//             error_message
+//         )
+//     }
+// }

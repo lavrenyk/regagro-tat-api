@@ -1,7 +1,21 @@
 {
   "rust-analyzer.linkedProjects": ["./Cargo.toml", "./Cargo.toml"],
-  "cSpell.words": [
-    "chrono"
-  ],
-  "rust-analyzer.showUnlinkedFileNotification": false
+  "cSpell.words": ["chrono"],
+  "rust-analyzer.showUnlinkedFileNotification": false,
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default",
+        "enableSsl": "Disabled"
+      },
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 3306,
+      "driver": "MySQL",
+      "name": "MySQL_local",
+      "database": "mysql",
+      "username": "root",
+      "password": "kakeepoo"
+    }
+  ]
 }

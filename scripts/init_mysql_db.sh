@@ -3,8 +3,8 @@ set -x
 set -eo pipefail
 
 # Check if `sqlx` has installed
-if ! [ -x "$(command -v psql)" ]; then
-  echo >&2 "Error: psql is not installed."
+if ! [ -x "$(command -v mysql)" ]; then
+  echo >&2 "Error: mysql is not installed."
   exit 1
 fi
 
@@ -19,35 +19,34 @@ if ! [ -x "$(command -v sqlx)" ]; then
 fi
 
 # Setup constants
-DB_USER="${POSTGRESS_USER:=postgres}"
-DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
-DB_NAME="${POSTGRES_DB:=newsletter}"
-DB_PORT="${POSTGRES_PORT:=5435}"
-DB_HOST="${POSTGRES_HOST:=localhost}"
+DB_USER="${MYSQL_USER:=root}"
+DB_PASSWORD="${MYSQL_ROOT_PASSWORD:=kakeepoo}"
+DB_NAME="${MYSQL_DB:=regagro_3_0}"
+DB_PORT="${MYSQL_PORT:=3306}"
+DB_HOST="${MYSQL_HOST:=127.0.0.1}"
 
-# Launch postgres using Docker
+# Launch MySql using Docker
 if [[ -z "${SKIP_DOCKER}" ]]
 then
   docker run\
-  -e POSTGRES_USER=${DB_USER}\
-  -e POSTGRES_PASSWORD=${DB_PASSWORD}\
-  -e POSTGRES_DB=${DB_NAME}\
-  -p "${DB_PORT}":5432\
-  -d postgres -N 1000
+  -e MYSQL_ROOT_PASSWORD=${DB_PASSWORD}\
+  -e MYSQL_DATABASE=${DB_NAME}\
+  -p "${DB_PORT}":3306\
+  -d mysql
 fi
 
-# Keep pinging Postgres until it's ready to accept commands
-export PGPASSWORD="${DB_PASSWORD}"
-until psql -h "${DB_HOST}" -U "${DB_USER}" -p ${DB_PORT} -d "postgres" -c '\q'; do
- >&2 echo "Postgres is still unavalable -sleeping"
+# Keep pinging MySql until it's ready to accept commands
+export MYSQL_PASSWORD="${DB_PASSWORD}"
+until mysqladmin ping -h "${DB_HOST}"  --password=kakeepoo -P "${DB_PORT}"; do
+ >&2 echo "MySQL is still unavalable -sleeping"
  sleep 5
 done
 
->&2 echo "Postgres is up and running on port ${DB_PORT}"
+>&2 echo "MySQL is up and running on port ${DB_PORT}"
 
-DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+DATABASE_URL=mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 export DATABASE_URL
 sqlx database create
 sqlx migrate run
 
->&2 echo "Postgres has been migrated, ready to go!"
+>&2 echo "MySQL has been migrated, ready to go!"

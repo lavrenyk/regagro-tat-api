@@ -1,8 +1,5 @@
 //! main.rs
-use async_std::task;
-use serde_json::Value;
-use sqlx::PgPool;
-use sqlx::{Error, MySql, MySqlPool, Pool};
+use sqlx::MySqlPool;
 use std::net::TcpListener;
 use tracing::{subscriber::set_global_default, Subscriber};
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
@@ -56,8 +53,8 @@ async fn main() -> Result<(), std::io::Error> {
     set_global_default(subscriber).expect("Failed to set subscriber.");
 
     let configuration = get_configuration().expect("Failed to read configuration.");
-    let connection_pool = PgPool::connect_lazy(&configuration.database.connection_string())
-        .expect("Failed to create Postgres connection pool.");
+    let connection_pool = MySqlPool::connect_lazy(&configuration.database.connection_string())
+        .expect("Failed to create MySql connection pool.");
     let address = format!(
         "{}:{}",
         configuration.application.host, configuration.application.port

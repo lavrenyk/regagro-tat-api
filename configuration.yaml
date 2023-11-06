@@ -4,7 +4,7 @@ application:
   host: 127.0.0.1
 database:
   host: "127.0.0.1"
-  port: 5435
-  username: "postgres"
-  password: "password"
-  database_name: "newsletter"
+  port: 3306
+  username: "root"
+  password: "kakeepoo"
+  database_name: "regagro_3_0"
