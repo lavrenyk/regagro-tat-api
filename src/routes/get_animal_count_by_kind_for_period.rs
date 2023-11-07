@@ -1,12 +1,11 @@
 //! src/routes/api/analytics/animals/get_animal_by_kind_for_period.rs
 
-use crate::helpers::{all_districts_filter, animals_filter_query, district_filter_query};
+use crate::helpers::{all_districts_filter, district_filter_query};
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::MySqlPool;
 use std::fs;
-use tracing::Instrument;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -54,7 +53,6 @@ pub async fn get_animal_count_by_kind_for_period(
     pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
     let request_id = Uuid::new_v4();
-    let query_span = tracing::info_span!("Requesting animals count by kinds for period");
 
     // ЭТАП 1: Переформатируем QueryData в необходимые данные для работы
     // 1. Определяем количество видов в запросе. Для этого переводим данные QueryData.kinds
