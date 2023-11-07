@@ -1,6 +1,9 @@
 {
   "rust-analyzer.linkedProjects": ["./Cargo.toml", "./Cargo.toml"],
-  "cSpell.words": ["chrono"],
+  "cSpell.words": [
+    "chrono",
+    "regagro"
+  ],
   "rust-analyzer.showUnlinkedFileNotification": false,
   "sqltools.connections": [
     {

@@ -2,9 +2,10 @@
 
 use crate::helpers::{all_districts_filter, animals_filter_query, district_filter_query};
 use actix_web::{web, HttpResponse};
-use async_std::stream::StreamExt;
 use serde::{Deserialize, Serialize};
-use sqlx::{query_builder::QueryBuilder, Column, Execute, MySqlConnection, MySqlPool, Row};
+use serde_json::Value;
+use sqlx::MySqlPool;
+use std::fs;
 use tracing::Instrument;
 use uuid::Uuid;
 
@@ -17,6 +18,24 @@ pub struct QueryData {
     pub districts: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResponseItem {
+    pub count: i64,
+    pub kind_id: u32,
+    pub view: String,
+    pub name: String,
+}
+impl ResponseItem {
+    pub fn new() -> Self {
+        Self {
+            count: 0,
+            kind_id: 0,
+            view: "".to_string(),
+            name: "".to_string(),
+        }
+    }
+}
+
 /// Generate response JSON with data for any asked kind of animal in separated data
 /// with filtered by given period and districts.
 ///
@@ -24,7 +43,7 @@ pub struct QueryData {
 /// * `[
 /// *    {
 /// *        "count": 31990, // u32 - amount of the filtered animal kinds in db
-/// *        "kind_id": 1,  // u8 - animal kind number
+/// *        "kind_id": 1,  // u32 - animal kind number
 /// *        "view": "КРС", // String - animal kind short name
 /// *        "name": "Крупный рогатый скот" // String - animal kind full name
 /// *    },
@@ -66,42 +85,57 @@ pub async fn get_animal_count_by_kind_for_period(
         }
     }
 
-    let query = format!("SELECT id FROM animals LIMIT 10");
+    // 3. Подготавливаем данные с информацией о типах животных и формируем JSON
+    // данные будут использованы для формирования ответного JSON
+    let file_path = "src/data/animals.json".to_owned();
+    let contents = fs::read_to_string(file_path).expect("Couldn't find or load that file.");
+    let contents = contents.as_str();
+    let animal_kinds_data: Value = serde_json::from_str(contents).unwrap();
 
-    let result = sqlx::query(
-        r#"
-            SELECT COUNT(*) as count FROM animals;
-        "#,
-    )
-    .fetch_all(pool.as_ref())
-    .await;
+    let connection =
+        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33633/regagro_3_0")
+            .await;
 
-    let result2: Result<(i64,), _> = sqlx::query_as(
-        r#"
-            SELECT COUNT(*) as count FROM animals;
-        "#,
-    )
-    .fetch_one(pool.as_ref())
-    .await;
+    let mut response_data: Vec<ResponseItem> = vec![];
 
-    // let new_res: u64 = &result.unwrap()[0].try_get("count");
-    // dbg!(&result.unwrap()[0].try_get::<u64, _>("count"));
-    dbg!(&result2.unwrap().0);
+    match connection {
+        Err(err) => {
+            println!("Cannot connect to database [{}]", err.to_string());
+        }
+        Ok(pool) => {
+            println!("Connected to database successfully.");
 
-    // match sqlx::query(&query)
-    //     .fetch_all(pool.as_ref())
-    //     // .instrument(query_span)
-    //     .await
-    // {
-    //     Ok(data) => {
-    //         dbg!(data);
-    //         HttpResponse::Ok().finish()
-    //     }
-    //     Err(e) => {
-    //         tracing::error!("{} - Failed to execute query: {:?}", request_id, e);
-    //         HttpResponse::InternalServerError().finish()
-    //     }
-    // }
+            for (_i, kind) in animal_kinds.iter().enumerate() {
+                let mut responseItem = ResponseItem::new();
+
+                for animal_kind in animal_kinds_data.as_array().unwrap() {
+                    if &animal_kind["regagro_code"].as_str().unwrap() == kind {
+                        responseItem.kind_id = kind.parse().unwrap();
+                        responseItem.name = animal_kind["name"].to_string();
+                        responseItem.view = animal_kind["view"].to_string();
+                    }
+                }
+
+                let kind: u32 = kind.parse().unwrap();
+                let query = format!("SELECT COUNT(*) FROM animals AS a LEFT JOIN enterprises AS e ON a.enterprise_id=e.id LEFT JOIN enterprise_addresses AS ea ON ea.enterprise_id=e.id WHERE a.kind_id={} AND ({});", kind, districts_filter);
+
+                let result: Result<(i64,), _> =
+                    sqlx::query_as(query.as_str()).fetch_one(&pool).await;
+
+                let result = result.unwrap().0;
+
+                if result > 0 {
+                    responseItem.count = result;
+                } else {
+                    break;
+                }
+
+                response_data.push(responseItem);
+            }
+        }
+    }
+
+    dbg!(&response_data);
 
     HttpResponse::Ok().finish()
 }
