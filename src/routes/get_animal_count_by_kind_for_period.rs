@@ -27,6 +27,20 @@ impl ResponseItem {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct Animal {
+    id: i32,
+    name: String,
+    view: String,
+    is_home: u8,
+    active: u8,
+    regagro_code: String,
+    regagro_code_v3: String,
+    regagro_gos_code: String,
+    regagro_id: String,
+    sort_by: u8,
+}
+
 /// Generate response JSON with data for any asked kind of animal in separated data
 /// with filtered by given period and districts.
 ///
@@ -80,7 +94,7 @@ pub async fn get_animal_count_by_kind_for_period(
     let file_path = "src/data/animals.json".to_owned();
     let contents = fs::read_to_string(file_path).expect("Couldn't find or load that file.");
     let contents = contents.as_str();
-    let animal_kinds_data: Value = serde_json::from_str(contents).unwrap();
+    let animal_kinds_data: Value = serde_json::from_str(&contents).unwrap();
 
     let connection =
         MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33633/regagro_3_0")

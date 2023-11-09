@@ -42,7 +42,6 @@ pub fn animals_filter_query(animals: &str) -> String {
 }
 
 pub fn district_filter_query(districts: &str) -> String {
-    dbg!(&districts);
     let codes: Vec<&str> = districts.split(",").collect();
     let mut query_filter = "".to_string();
     let file_path = "src/data/districts.json".to_owned();
@@ -73,12 +72,6 @@ pub fn district_filter_query(districts: &str) -> String {
         }
     }
 
-    if query_filter != "" {
-        query_filter = format!("ea.district_code IN ({})", query_filter);
-    }
-
-    // dbg!(&query_filter);
-
     query_filter
 }
 
@@ -88,4 +81,38 @@ pub fn all_districts_filter() -> String {
         all_districts = format!("{},{}", all_districts, i);
     }
     district_filter_query(all_districts.as_str())
+}
+
+pub fn get_district_names(districts: &str) -> String {
+    let codes: Vec<&str> = districts.split(",").collect();
+    let mut district_names = "".to_string();
+    let file_path = "src/data/districts.json".to_owned();
+
+    // Грузим данные из файла в переменную
+    let contents = fs::read_to_string(file_path).expect("Couldn't find or load that file.");
+    let contents = contents.as_str();
+
+    // переводим в JSON
+    let object: Value = serde_json::from_str(contents).unwrap();
+
+    for (i, code) in codes.iter().enumerate() {
+        // получаем guid дистрикта
+        let mut name = "".to_string();
+        for i in 0..44 {
+            if object[i]["id"] == code.parse::<i64>().unwrap() {
+                name = object[i]["name"].to_string();
+            }
+        }
+
+        // Обрезаем кавычки
+        let name: &str = &name.as_str()[1..name.len() - 1];
+
+        if i == 0 {
+            district_names = format!("'{}'", name);
+        } else {
+            district_names = format!("{}, '{}'", district_names, name);
+        }
+    }
+
+    district_names
 }
