@@ -6,7 +6,7 @@
         "is_home": 0,
         "active": 1,
         "regagro_code": "1",
-        "regagro_code_v3": "2",
+        "regagro_code_v3": "1",
         "regagro_gos_code": "2aa",
         "regagro_id": "1",
         "sort_by": 1
@@ -18,7 +18,7 @@
         "is_home": 0,
         "active": 1,
         "regagro_code": "3",
-        "regagro_code_v3": "1",
+        "regagro_code_v3": "2",
         "regagro_gos_code": "5aa",
         "regagro_id": "3",
         "sort_by": 4
@@ -30,7 +30,7 @@
         "is_home": 0,
         "active": 1,
         "regagro_code": "5",
-        "regagro_code_v3": "5",
+        "regagro_code_v3": "3",
         "regagro_gos_code": "1aa",
         "regagro_id": "5",
         "sort_by": 5
@@ -42,7 +42,7 @@
         "is_home": 0,
         "active": 1,
         "regagro_code": "6",
-        "regagro_code_v3": "6",
+        "regagro_code_v3": "4",
         "regagro_gos_code": "10a",
         "regagro_id": "6",
         "sort_by": 11
@@ -54,7 +54,7 @@
         "is_home": 1,
         "active": 1,
         "regagro_code": "7",
-        "regagro_code_v3": "7",
+        "regagro_code_v3": "5",
         "regagro_gos_code": "7aa",
         "regagro_id": "7",
         "sort_by": 12
@@ -66,7 +66,7 @@
         "is_home": 1,
         "active": 1,
         "regagro_code": "8",
-        "regagro_code_v3": "8",
+        "regagro_code_v3": "6",
         "regagro_gos_code": "7ab",
         "regagro_id": "8",
         "sort_by": 13
@@ -78,7 +78,7 @@
         "is_home": 0,
         "active": 1,
         "regagro_code": "9",
-        "regagro_code_v3": "9",
+        "regagro_code_v3": "7",
         "regagro_gos_code": "3aa",
         "regagro_id": "14",
         "sort_by": 6
@@ -90,7 +90,7 @@
         "is_home": 0,
         "active": 1,
         "regagro_code": "10",
-        "regagro_code_v3": "10",
+        "regagro_code_v3": "8",
         "regagro_gos_code": "3ab",
         "regagro_id": "15",
         "sort_by": 7
@@ -102,7 +102,7 @@
         "is_home": 0,
         "active": 1,
         "regagro_code": "11",
-        "regagro_code_v3": "11",
+        "regagro_code_v3": "9",
         "regagro_gos_code": "4aa",
         "regagro_id": "16",
         "sort_by": 8
@@ -114,7 +114,7 @@
         "is_home": 0,
         "active": 1,
         "regagro_code": "12",
-        "regagro_code_v3": "12",
+        "regagro_code_v3": "10",
         "regagro_gos_code": "1ab",
         "regagro_id": "17",
         "sort_by": 9
@@ -126,7 +126,7 @@
         "is_home": 0,
         "active": 1,
         "regagro_code": "13",
-        "regagro_code_v3": "13",
+        "regagro_code_v3": "11",
         "regagro_gos_code": "2ab",
         "regagro_id": "18",
         "sort_by": 10
@@ -138,7 +138,7 @@
         "is_home": 0,
         "active": 1,
         "regagro_code": "4",
-        "regagro_code_v3": "4",
+        "regagro_code_v3": "13",
         "regagro_gos_code": "6aa",
         "regagro_id": null,
         "sort_by": 2
@@ -150,7 +150,7 @@
         "is_home": 0,
         "active": 1,
         "regagro_code": "4",
-        "regagro_code_v3": "4",
+        "regagro_code_v3": "12",
         "regagro_gos_code": "6ab",
         "regagro_id": null,
         "sort_by": 3

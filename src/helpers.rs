@@ -4,7 +4,7 @@ use serde_json::Value;
 
 pub fn animals_filter_query(animals: &str) -> String {
     let codes: Vec<&str> = animals.split(",").collect();
-    dbg!(&codes);
+    // dbg!(&codes);
     let mut query_filter = "".to_string();
     let file_path = "src/data/animals.json".to_owned();
 
@@ -15,15 +15,15 @@ pub fn animals_filter_query(animals: &str) -> String {
     let object: Value = serde_json::from_str(contents).unwrap();
 
     for (i, code) in codes.iter().enumerate() {
-        dbg!(&code);
+        // dbg!(&code);
         let mut regagro_code_v3: String = "".to_string();
         for i in 0..12 {
-            if &object[i]["regagro_code"].as_str().unwrap() == code {
+            if &object[i]["id"].as_str().unwrap() == code {
                 regagro_code_v3 = object[i]["regagro_code_v3"].as_str().unwrap().to_string();
             }
         }
 
-        dbg!(&regagro_code_v3);
+        // dbg!(&regagro_code_v3);
 
         if &regagro_code_v3 == "" {
             continue;
@@ -67,11 +67,17 @@ pub fn district_filter_query(districts: &str) -> String {
         let guid: &str = &guid.as_str()[1..guid.len() - 1];
 
         if i == 0 {
-            query_filter = format!("ea.district_code='{}'", guid);
+            query_filter = format!("'{}'", guid);
         } else {
-            query_filter = format!("{} OR ea.district_code='{}'", query_filter, guid);
+            query_filter = format!("{}, '{}'", query_filter, guid);
         }
     }
+
+    if query_filter != "" {
+        query_filter = format!("ea.district_code IN ({})", query_filter);
+    }
+
+    // dbg!(&query_filter);
 
     query_filter
 }

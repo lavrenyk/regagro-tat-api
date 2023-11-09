@@ -1,21 +1,13 @@
 //! src/routes/api/analytics/animals/get_animal_by_kind_for_period.rs
-
+#![allow(unused_assignments)]
 use crate::helpers::{all_districts_filter, district_filter_query};
+use crate::structs::QueryData;
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{json, Value};
 use sqlx::MySqlPool;
 use std::fs;
 use uuid::Uuid;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct QueryData {
-    pub region_id: Option<u32>,
-    pub date_reg_from: Option<String>,
-    pub date_reg_to: Option<String>,
-    pub kinds: Option<String>,
-    pub districts: Option<String>,
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResponseItem {
@@ -50,23 +42,23 @@ impl ResponseItem {
 /// * ]`
 pub async fn get_animal_count_by_kind_for_period(
     data: web::Query<QueryData>,
-    pool: web::Data<MySqlPool>,
+    _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
-    let request_id = Uuid::new_v4();
+    let _request_id = Uuid::new_v4();
 
     // ЭТАП 1: Переформатируем QueryData в необходимые данные для работы
     // 1. Определяем количество видов в запросе. Для этого переводим данные QueryData.kinds
     // из [`String`] в [`Vec<u8>`]. Дополнительно проверяем, были ли данные по в запросе по
     // видам животных, если не было, то выбираем все типы животных
-    let mut animal_kinds: Vec<&str> = vec![];
+    let mut animal_kinds_filter: Vec<&str> = vec![];
 
     match &data.kinds {
         Some(kinds) => {
-            animal_kinds = kinds.split(",").collect();
+            animal_kinds_filter = kinds.split(",").collect();
         }
         // If no parameter was send selecting all animals kinds
         None => {
-            animal_kinds = "1,2,3,4,5,6,7,8,9,10,11,12,13".split(",").collect();
+            animal_kinds_filter = "1,2,3,4,5,6,7,8,9,10,11,12,13".split(",").collect();
         }
     }
 
@@ -103,19 +95,29 @@ pub async fn get_animal_count_by_kind_for_period(
         Ok(pool) => {
             println!("Connected to database successfully.");
 
-            for (_i, kind) in animal_kinds.iter().enumerate() {
-                let mut responseItem = ResponseItem::new();
+            for (_i, kind_filter) in animal_kinds_filter.iter().enumerate() {
+                let mut response_item = ResponseItem::new();
 
                 for animal_kind in animal_kinds_data.as_array().unwrap() {
-                    if &animal_kind["regagro_code"].as_str().unwrap() == kind {
-                        responseItem.kind_id = kind.parse().unwrap();
-                        responseItem.name = animal_kind["name"].to_string();
-                        responseItem.view = animal_kind["view"].to_string();
+                    // dbg!(&kind_filter);
+                    // dbg!(&animal_kind);
+                    if &animal_kind["regagro_code_v3"].as_str().unwrap() == kind_filter {
+                        response_item.kind_id = kind_filter.parse().unwrap();
+                        response_item.name =
+                            animal_kind["name"].as_str().to_owned().unwrap().to_string();
+                        response_item.view =
+                            animal_kind["view"].as_str().to_owned().unwrap().to_string();
+                        // dbg!(&response_item);
+                        break;
                     }
                 }
 
-                let kind: u32 = kind.parse().unwrap();
-                let query = format!("SELECT COUNT(*) FROM animals AS a LEFT JOIN enterprises AS e ON a.enterprise_id=e.id LEFT JOIN enterprise_addresses AS ea ON ea.enterprise_id=e.id WHERE a.kind_id={} AND ({});", kind, districts_filter);
+                let kind_id: u32 = kind_filter.parse().unwrap();
+                let query = format!(
+                    "SELECT COUNT(*) FROM animals AS a LEFT JOIN enterprises AS e ON a.enterprise_id=e.id LEFT JOIN enterprise_addresses AS ea ON ea.enterprise_id=e.id WHERE a.kind_id={} AND ea.district_code IN ({});",
+                    kind_id,
+                    districts_filter
+                );
 
                 let result: Result<(i64,), _> =
                     sqlx::query_as(query.as_str()).fetch_one(&pool).await;
@@ -123,17 +125,26 @@ pub async fn get_animal_count_by_kind_for_period(
                 let result = result.unwrap().0;
 
                 if result > 0 {
-                    responseItem.count = result;
+                    response_item.count = result;
+                    // dbg!(&response_item);
                 } else {
                     break;
                 }
 
-                response_data.push(responseItem);
+                // dbg!(&response_item);
+
+                response_data.push(response_item);
             }
         }
     }
 
-    dbg!(&response_data);
+    // dbg!(&response_data);
 
-    HttpResponse::Ok().finish()
+    let json_response = json!(response_data);
+
+    // dbg!(json_response);
+
+    HttpResponse::Ok()
+        .content_type("application/json")
+        .json(json_response)
 }
