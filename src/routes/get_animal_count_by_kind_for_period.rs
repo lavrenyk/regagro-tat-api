@@ -60,6 +60,8 @@ pub async fn get_animal_count_by_kind_for_period(
 ) -> HttpResponse {
     let _request_id = Uuid::new_v4();
 
+    dbg!(&data);
+
     // ЭТАП 1: Переформатируем QueryData в необходимые данные для работы
     // 1. Определяем количество видов в запросе. Для этого переводим данные QueryData.kinds
     // из [`String`] в [`Vec<u8>`]. Дополнительно проверяем, были ли данные по в запросе по
@@ -76,6 +78,8 @@ pub async fn get_animal_count_by_kind_for_period(
         }
     }
 
+    dbg!(&animal_kinds_filter);
+
     // 2. Переводим QueryData.districts из [`String`] в [`Vec<String>`] с параллельной конвертацией
     // числового значения в GUID региона и готовой части фильтра для запроса. Если в запросе нет данных,
     // то выбираем все регионы
@@ -88,6 +92,8 @@ pub async fn get_animal_count_by_kind_for_period(
             districts_filter = all_districts_filter();
         }
     }
+
+    dbg!(&districts_filter);
 
     // 3. Подготавливаем данные с информацией о типах животных и формируем JSON
     // данные будут использованы для формирования ответного JSON
@@ -113,15 +119,15 @@ pub async fn get_animal_count_by_kind_for_period(
                 let mut response_item = ResponseItem::new();
 
                 for animal_kind in animal_kinds_data.as_array().unwrap() {
-                    // dbg!(&kind_filter);
-                    // dbg!(&animal_kind);
+                    dbg!(&kind_filter);
+                    dbg!(&animal_kind);
                     if &animal_kind["regagro_code_v3"].as_str().unwrap() == kind_filter {
                         response_item.kind_id = kind_filter.parse().unwrap();
                         response_item.name =
                             animal_kind["name"].as_str().to_owned().unwrap().to_string();
                         response_item.view =
                             animal_kind["view"].as_str().to_owned().unwrap().to_string();
-                        // dbg!(&response_item);
+                        dbg!(&response_item);
                         break;
                     }
                 }
@@ -132,6 +138,8 @@ pub async fn get_animal_count_by_kind_for_period(
                     kind_id,
                     districts_filter
                 );
+
+                dbg!(&query);
 
                 let result: Result<(i64,), _> =
                     sqlx::query_as(query.as_str()).fetch_one(&pool).await;

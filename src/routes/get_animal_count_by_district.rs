@@ -40,16 +40,35 @@ pub async fn get_animal_count_by_district(
 
     dbg!(&data);
 
-    let districts = data.districts.clone().unwrap();
+    let mut districts =
+        "264,264,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280".to_string();
 
     let mut districts_filter = "".to_string();
     match &data.districts {
-        Some(districts) => {
-            districts_filter = district_filter_query(districts.as_str());
+        Some(data) => {
+            districts_filter = district_filter_query(&data.as_str());
+            districts = data.to_string();
         }
         None => {
             districts_filter = all_districts_filter();
         }
+    }
+
+    let mut filter_date_from = "2023-01-01".to_string();
+    let mut filter_date_to = "2023-12-31".to_string();
+
+    match &data.date_reg_from {
+        Some(date_from) => {
+            filter_date_from = date_from.to_string();
+        }
+        None => (),
+    }
+
+    match &data.date_reg_to {
+        Some(date_to) => {
+            filter_date_to = date_to.to_string();
+        }
+        None => (),
     }
 
     let connection =
@@ -59,7 +78,7 @@ pub async fn get_animal_count_by_district(
     let test_query = format!(
         r#"
         SELECT 
-            a.id AS id,
+            ea.id AS id,
             (CASE WHEN district_code IS NULL THEN locality_code ELSE district_code END) as name,
             COUNT(a.id) AS count,
             CAST(SUM(a.kind_id = 1) AS INTEGER) AS krs_count,
@@ -82,12 +101,12 @@ pub async fn get_animal_count_by_district(
 
         WHERE ea.district_code IN ({})
         OR ea.locality_code IN ({})
-        AND a.created_at > '2023-01-01'
-        AND a.created_at < '2023-12-31'
+        AND a.created_at > '{}'
+        AND a.created_at < '{}'
 
         GROUP BY name
     "#,
-        &districts_filter, &districts_filter
+        &districts_filter, &districts_filter, filter_date_from, filter_date_to
     );
 
     dbg!(&test_query);
