@@ -1,6 +1,6 @@
 use std::fs;
 
-use serde_json::Value;
+use serde_json::{json, Value};
 
 pub fn animals_filter_query(animals: &str) -> String {
     let codes: Vec<&str> = animals.split(",").collect();
@@ -115,4 +115,32 @@ pub fn get_district_names(districts: &str) -> String {
     }
 
     district_names
+}
+
+fn load_districts_data() -> Value {
+    let file_path = "src/data/districts.json".to_owned();
+    // Грузим данные из файла в переменную
+    let contents = fs::read_to_string(file_path).expect("Couldn't find or load that file.");
+    let contents = contents.as_str();
+
+    // переводим данные из файла в JSON
+    let districts_data: Value = serde_json::from_str(contents).unwrap();
+
+    districts_data
+}
+
+pub fn get_district_name_by_id(district_guid: &str) -> (i64, String) {
+    let districts_data = load_districts_data();
+
+    let mut district_id = 0;
+    let mut district_name = String::new();
+
+    for district in districts_data.as_array().unwrap() {
+        if district["guid"] == district_guid {
+            district_id = district["id"].as_i64().unwrap_or(0);
+            district_name = district["view"].as_str().unwrap().to_string();
+        }
+    }
+
+    (district_id, district_name)
 }
