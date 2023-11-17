@@ -10,7 +10,7 @@ pub async fn get_livestock_count_by_companies(
     _data: web::Query<QueryData>,
     _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
-    let json_response = json!("[]");
+    let json_response = json!([]);
 
     HttpResponse::Ok()
         .content_type("application/json")

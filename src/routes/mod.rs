@@ -1,5 +1,6 @@
 //! src/routes/mod.rs
 mod get_animal_count_by_district;
+mod get_animal_count_by_kind;
 mod get_animal_count_by_kind_for_period;
 mod get_apiary_count_by_district;
 mod get_disposal_count_by_district;
@@ -21,6 +22,7 @@ mod get_vaccinations_by_pos_councils;
 mod health_check;
 
 pub use get_animal_count_by_district::*;
+pub use get_animal_count_by_kind::*;
 pub use get_animal_count_by_kind_for_period::*;
 pub use get_apiary_count_by_district::*;
 pub use get_disposal_count_by_district::*;

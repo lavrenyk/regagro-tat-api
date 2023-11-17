@@ -1,7 +1,10 @@
 //! src/routes/api/analytics/animals/get_animal_count_by_district.rs
 #![allow(unused_assignments)]
 use crate::{
-    helpers::{all_districts_filter, district_filter_query, get_district_names},
+    helpers::{
+        all_districts_filter, district_filter_query, get_district_name_by_id, get_district_names,
+        get_kind_name_by_id,
+    },
     structs::QueryData,
 };
 use actix_web::{web, HttpResponse};
@@ -40,14 +43,14 @@ pub async fn get_animal_count_by_district(
 
     dbg!(&data);
 
-    let mut districts =
-        "264,264,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299,300,301,302,303,304,305,306,307,308".to_string();
+    // let mut districts =
+    //     "264,264,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290".to_string();
 
     let mut districts_filter = "".to_string();
     match &data.districts {
         Some(data) => {
             districts_filter = district_filter_query(&data.as_str());
-            districts = data.to_string();
+            // districts = data.to_string();
         }
         None => {
             districts_filter = all_districts_filter();
@@ -81,26 +84,26 @@ pub async fn get_animal_count_by_district(
             ea.id AS id,
             (CASE WHEN district_code IS NULL THEN locality_code ELSE district_code END) as name,
             COUNT(a.id) AS count,
-            CAST(SUM(a.kind_id = 1) AS INTEGER) AS krs_count,
-            CAST(SUM(a.kind_id = 2) AS INTEGER) AS pig_count,
-            CAST(SUM(a.kind_id = 3) AS INTEGER) AS goat_count,
-            CAST(SUM(a.kind_id = 4) AS INTEGER) AS sheep_count,
-            CAST(SUM(a.kind_id = 5) AS INTEGER) AS horse_count,
-            CAST(SUM(a.kind_id = 6) AS INTEGER) AS bee_count,
-            CAST(SUM(a.kind_id = 7) AS INTEGER) AS dog_count,
-            CAST(SUM(a.kind_id = 8) AS INTEGER) AS cat_count,
-            CAST(SUM(a.kind_id = 9) AS INTEGER) AS deer_count,
-            CAST(SUM(a.kind_id = 10) AS INTEGER) AS maral_count,
-            CAST(SUM(a.kind_id = 11) AS INTEGER) AS camel_count,
-            CAST(SUM(a.kind_id = 12) AS INTEGER) AS donkey_count,
-            CAST(SUM(a.kind_id = 13) AS INTEGER) AS bison_count
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 1 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `krs_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 2 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `pig_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 12 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `goat_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 13 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `sheep_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 3 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `horse_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 4 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `bee_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 5 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `dog_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 6 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `cat_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 7 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `deer_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 8 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `maral_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 9 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `camel_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 10 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `donkey_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 11 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `bison_count`
 
         FROM enterprise_addresses AS ea
         LEFT JOIN enterprises AS e ON ea.enterprise_id = e.id
         LEFT JOIN animals AS a ON e.id = a.enterprise_id
 
-        WHERE ea.district_code IN ({})
-        OR ea.locality_code IN ({})
+        WHERE ea.region_code = "0c089b04-099e-4e0e-955a-6bf1ce525f1a" 
+        AND ea.district_code IN ({}) OR ea.locality_code IN ({})
         AND a.created_at > '{}'
         AND a.created_at < '{}'
 
@@ -111,7 +114,11 @@ pub async fn get_animal_count_by_district(
 
     dbg!(&test_query);
 
-    let mut response: Vec<ResponseItem> = vec![];
+    let i = 10;
+
+    sqlx::query!("SELECT * FROM animals WHERE id=?", i);
+
+    let mut sql_response: Vec<ResponseItem> = vec![];
 
     match connection {
         Err(err) => {
@@ -122,21 +129,34 @@ pub async fn get_animal_count_by_district(
             let result_all: Result<Vec<ResponseItem>, _> =
                 sqlx::query_as(&test_query).fetch_all(&pool).await;
             dbg!(&result_all);
-            response = result_all.unwrap();
+            sql_response = result_all.unwrap();
         }
     }
 
-    // Обновляем id и имя в результатах запроса
-    let district_codes: Vec<&str> = districts.split(",").collect();
-    let district_names = get_district_names(&districts.as_str());
-    let district_names: Vec<&str> = district_names.split(",").collect();
+    let mut response: Vec<ResponseItem> = vec![];
 
-    for (index, item) in district_codes.iter().enumerate() {
-        response[index].id = item.parse::<u64>().unwrap();
-    }
+    for sql_item in sql_response {
+        let (id, name) = get_district_name_by_id(&sql_item.name);
+        let response_item = ResponseItem {
+            id: id.try_into().unwrap(),
+            name,
+            count: sql_item.count,
+            krs_count: sql_item.krs_count,
+            pig_count: sql_item.pig_count,
+            goat_count: sql_item.goat_count,
+            sheep_count: sql_item.sheep_count,
+            horse_count: sql_item.horse_count,
+            bee_count: sql_item.bee_count,
+            dog_count: sql_item.dog_count,
+            cat_count: sql_item.cat_count,
+            deer_count: sql_item.deer_count,
+            maral_count: sql_item.maral_count,
+            camel_count: sql_item.camel_count,
+            donkey_count: sql_item.donkey_count,
+            bison_count: sql_item.bison_count,
+        };
 
-    for (index, item) in district_names.iter().enumerate() {
-        response[index].name = item.to_string();
+        response.push(response_item);
     }
 
     let json_response = json!(response);

@@ -2,6 +2,7 @@
   "rust-analyzer.linkedProjects": ["./Cargo.toml", "./Cargo.toml"],
   "cSpell.words": [
     "chrono",
+    "maral",
     "regagro"
   ],
   "rust-analyzer.showUnlinkedFileNotification": false,

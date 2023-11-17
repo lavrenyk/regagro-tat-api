@@ -81,20 +81,16 @@ async fn health_check_works() {
         .await
         .expect("Failed to execute request.");
 
-    let get_db_data = sqlx::query(
-        r#"
-        SELECT COUNT(*) FROM animals;
-        "#,
-    )
-    .fetch_one(&app.db_pool)
-    .await
-    .expect("Failed to get data from db");
-
-    dbg!(get_db_data);
-
     // Assert
     assert!(response.status().is_success());
     assert_eq!(Some(0), response.content_length());
+}
+
+#[tokio::test]
+async fn get_animal_count_by_district_works_without_parameters() {
+    // Arrange
+    let app = spawn_app().await;
+    let client = reqwest::Client::new();
 }
 
 // Упрощенный тест запроса, необходимо изменить его таким образом,

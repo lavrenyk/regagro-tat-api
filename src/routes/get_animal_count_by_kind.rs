@@ -1,4 +1,4 @@
-//! src/routes/api/analytics/animals/get_animal_by_kind_for_period.rs
+//! src/routes/api/analytics/animals/get_animal_by_kind.rs
 #![allow(unused_assignments)]
 use crate::helpers::{get_all_kind_ids, get_kind_name_by_id};
 use crate::structs::QueryData;
@@ -35,7 +35,7 @@ struct SqlResponse {
 /// *    },
 /// *    ... // other asked kinds of animals
 /// * ]`
-pub async fn get_animal_count_by_kind_for_period(
+pub async fn get_animal_count_by_kind(
     data: web::Query<QueryData>,
     _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
@@ -44,34 +44,7 @@ pub async fn get_animal_count_by_kind_for_period(
     dbg!(&data);
 
     // ЭТАП 1: Переформатируем QueryData в необходимые данные для работы
-
-    let mut date_from = "2023-01-01".to_string();
-    let mut date_to = "2023-12-31".to_string();
-    let mut kind_ids = "".to_string();
-
-    match &data.date_reg_from {
-        // check date
-        Some(data_date_from) => {
-            date_from = data_date_from.to_string();
-        }
-        None => (),
-    }
-
-    match &data.date_reg_to {
-        Some(data_date_to) => {
-            date_to = data_date_to.to_string();
-        }
-        None => (),
-    }
-
-    match &data.kinds {
-        Some(data_kinds) => {
-            kind_ids = data_kinds.to_string();
-        }
-        None => {
-            kind_ids = get_all_kind_ids();
-        }
-    }
+    let kind_ids = get_all_kind_ids();
 
     // ЭТАП 2: Запрашиваем информацию из БД
     let sql_query = format!(
@@ -85,11 +58,9 @@ pub async fn get_animal_count_by_kind_for_period(
 
         WHERE ea.region_code = "0c089b04-099e-4e0e-955a-6bf1ce525f1a" 
         AND a.kind_id IN ({})
-        AND a.created_at >= '{}'
-        AND a.created_at <= '{}'
 
         GROUP BY a.kind_id"#,
-        kind_ids, date_from, date_to
+        kind_ids
     );
 
     let connection =

@@ -28,7 +28,7 @@ DB_HOST="${MYSQL_HOST:=127.0.0.1}"
 # Launch MySql using Docker
 if [[ -z "${SKIP_DOCKER}" ]]
 then
-  docker run\
+  sudo docker run\
   -e MYSQL_ROOT_PASSWORD=${DB_PASSWORD}\
   -e MYSQL_DATABASE=${DB_NAME}\
   -p "${DB_PORT}":3306\

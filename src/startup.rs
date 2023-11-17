@@ -1,6 +1,6 @@
 //! src/startup.rs
 use crate::routes::{
-    get_animal_count_by_district, get_animal_count_by_kind_for_period,
+    get_animal_count_by_district, get_animal_count_by_kind, get_animal_count_by_kind_for_period,
     get_apiary_count_by_district, get_disposal_count_by_district, get_disposal_count_by_reason,
     get_enterprise_count_by_district, get_livestock_age_group_count_by_districts,
     get_livestock_age_group_count_by_pos_councils, get_livestock_count_by_companies,
@@ -31,6 +31,10 @@ pub fn run(listener: TcpListener, db_pool: MySqlPool) -> Result<Server, std::io:
             .route(
                 "/api/analytics/animals/getAnimalCountByKindForPeriod",
                 web::get().to(get_animal_count_by_kind_for_period),
+            )
+            .route(
+                "/api/analytics/animals/getAnimalCountByKind",
+                web::get().to(get_animal_count_by_kind),
             )
             .route(
                 "/api/analytics/animals/getApiaryCountByDistrict",

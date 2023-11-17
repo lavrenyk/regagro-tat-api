@@ -129,6 +129,19 @@ fn load_districts_data() -> Value {
     districts_data
 }
 
+fn load_json_file(name: &str) -> Value {
+    //! СДЕЛАТЬ ПРОВЕРКУ ИМЕНИ ФАЙЛА!!!
+    let file_path = format!("src/data/{}.json", name).to_owned();
+    // Грузим данные из файла в переменную
+    let contents = fs::read_to_string(file_path).expect("Couldn't find or load that file.");
+    let contents = contents.as_str();
+
+    // переводим данные из файла в JSON
+    let json_data: Value = serde_json::from_str(contents).unwrap();
+
+    json_data
+}
+
 pub fn get_district_name_by_id(district_guid: &str) -> (i64, String) {
     let districts_data = load_districts_data();
 
@@ -143,4 +156,32 @@ pub fn get_district_name_by_id(district_guid: &str) -> (i64, String) {
     }
 
     (district_id, district_name)
+}
+
+pub fn get_all_kind_ids() -> String {
+    let mut kind_ids = "1".to_string();
+    // Определяем количество типов животных
+    for i in 2..16 {
+        kind_ids = format!("{},{}", kind_ids, i);
+    }
+
+    kind_ids.to_string()
+}
+
+pub fn get_kind_name_by_id(kind_id: &u64) -> (String, String) {
+    let animals_json_data = load_json_file("animals");
+
+    let mut kind_name = String::new();
+    let mut kind_view = String::new();
+
+    for animal in animals_json_data.as_array().unwrap() {
+        dbg!(&animal["id"]).as_u64();
+        dbg!(&kind_id.to_string().as_str());
+        if &(animal["id"]).as_u64().unwrap() == kind_id {
+            kind_name = animal["name"].as_str().unwrap().to_string();
+            kind_view = animal["view"].as_str().unwrap().to_string();
+        }
+    }
+
+    (kind_name, kind_view)
 }
