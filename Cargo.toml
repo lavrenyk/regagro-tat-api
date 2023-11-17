@@ -40,7 +40,6 @@ bigdecimal = "0.4.2"
 features = [
   "runtime-tokio-rustls",
   "macros",
-  "postgres",
   "mysql",
   "uuid",
   "chrono",

@@ -9,11 +9,11 @@ use sqlx::{FromRow, MySqlPool};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ResponseItem {
-    pub count: u64,
-    pub kind_id: u64,
-    pub view: String,
-    pub name: String,
+struct ResponseItem {
+    count: u64,
+    kind_id: u64,
+    view: String,
+    name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]

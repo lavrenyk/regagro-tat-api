@@ -1,5 +1,6 @@
 //! src/routes/get_vaccinations_by_kinds.rs
 //! test url: '127.0.0.1:8000/api/v2/analytics/vaccinations/getVaccinationsByKinds?region_id=16&date_from=2023-01-01&date_to=2023-12-31&kind_ids=1,2,3,4,5&enterprise_districts=275,277&enterprise_pos_councils=1,2,3'
+#![allow(unused_assignments)]
 
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
@@ -31,7 +32,7 @@ pub async fn get_vaccinations_by_kinds(
     let mut date_from = "2023-01-01".to_string();
     let mut date_to = "2023-12-31".to_string();
     let mut kind_ids = "1,2,3,4,5,6,7,8,9,10,11,12,13".to_string();
-    let mut districts = "".to_string();
+    let mut districts = String::new();
 
     match &data.date_from {
         Some(data_date_from) => {

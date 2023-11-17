@@ -1,5 +1,6 @@
 //! src/routes/get_apiary_count_by_district.rs
 //! test URL: curl -v '127.0.0.1:8000/api/analytics/animals/getApiaryCountByDistrict?region_id=16&date_reg_from=2023-01-01&date_reg_to=2023-12-31&districts=275,277'
+#![allow(unused_assignments)]
 
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};

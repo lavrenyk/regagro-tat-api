@@ -1,5 +1,6 @@
 //! src/routes/get_vaccinations_by_districts.rs
 //! test URL: '127.0.0.1:8000/api/v2/analytics/vaccinations/getVaccinationsByDistricts?region_id=16&date_from=2023-01-01&date_to=2023-12-31&kind_ids=1,2,3,4,5&enterprise_districts=275,277'
+#![allow(unused_assignments)]
 
 use std::vec;
 
@@ -34,8 +35,6 @@ pub async fn get_vaccinations_by_districts(
     data: web::Query<QueryData>,
     _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
-    let json_response = json!("[]");
-
     //* Income data parse
     let mut date_from = "2023-01-01".to_string();
     let mut date_to = "2023-12-31".to_string();

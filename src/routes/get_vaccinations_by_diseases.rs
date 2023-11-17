@@ -1,5 +1,6 @@
 //! src/routes/get_vaccinations_by_diseases.rs
 //! 127.0.0.1:8000/api/v2/analytics/vaccinations/getVaccinationsByDiseases?region_id=16&date_from='2023-01-01'&date_to='2023-12-31'&kind_ids=1,2,3&enterprise_districts=275,277
+#![allow(unused_assignments)]
 
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};

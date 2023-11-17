@@ -1,6 +1,6 @@
 use std::fs;
 
-use serde_json::{json, Value};
+use serde_json::Value;
 
 pub fn animals_filter_query(animals: &str) -> String {
     let codes: Vec<&str> = animals.split(",").collect();

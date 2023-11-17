@@ -1,10 +1,7 @@
 //! src/routes/api/analytics/animals/get_animal_count_by_district.rs
 #![allow(unused_assignments)]
 use crate::{
-    helpers::{
-        all_districts_filter, district_filter_query, get_district_name_by_id, get_district_names,
-        get_kind_name_by_id,
-    },
+    helpers::{all_districts_filter, district_filter_query, get_district_name_by_id},
     structs::QueryData,
 };
 use actix_web::{web, HttpResponse};
@@ -41,10 +38,7 @@ pub async fn get_animal_count_by_district(
 ) -> HttpResponse {
     let _request_id = Uuid::new_v4();
 
-    dbg!(&data);
-
-    // let mut districts =
-    //     "264,264,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290".to_string();
+    // dbg!(&data);
 
     let mut districts_filter = "".to_string();
     match &data.districts {
@@ -112,12 +106,6 @@ pub async fn get_animal_count_by_district(
         &districts_filter, &districts_filter, filter_date_from, filter_date_to
     );
 
-    dbg!(&test_query);
-
-    let i = 10;
-
-    sqlx::query!("SELECT * FROM animals WHERE id=?", i);
-
     let mut sql_response: Vec<ResponseItem> = vec![];
 
     match connection {
@@ -128,7 +116,7 @@ pub async fn get_animal_count_by_district(
             println!("Connected to database successfully.");
             let result_all: Result<Vec<ResponseItem>, _> =
                 sqlx::query_as(&test_query).fetch_all(&pool).await;
-            dbg!(&result_all);
+            // dbg!(&result_all);
             sql_response = result_all.unwrap();
         }
     }
