@@ -2,12 +2,13 @@
 use crate::routes::{
     get_animal_count_by_district, get_animal_count_by_kind, get_animal_count_by_kind_for_period,
     get_apiary_count_by_district, get_disposal_count_by_district, get_disposal_count_by_reason,
-    get_enterprise_count_by_district, get_livestock_age_group_count_by_districts,
-    get_livestock_age_group_count_by_pos_councils, get_livestock_count_by_companies,
-    get_livestock_count_by_districts, get_livestock_count_by_pos_councils,
-    get_researches_by_diseases, get_researches_by_districts, get_researches_by_kinds,
-    get_researches_by_pos_councils, get_vaccinations_by_diseases, get_vaccinations_by_districts,
-    get_vaccinations_by_kinds, get_vaccinations_by_pos_councils, health_check,
+    get_enterprise_count_by_district, get_enterprise_count_by_type, get_kinds,
+    get_livestock_age_group_count_by_districts, get_livestock_age_group_count_by_pos_councils,
+    get_livestock_count_by_companies, get_livestock_count_by_districts,
+    get_livestock_count_by_pos_councils, get_regions, get_researches_by_diseases,
+    get_researches_by_districts, get_researches_by_kinds, get_researches_by_pos_councils,
+    get_vaccinations_by_diseases, get_vaccinations_by_districts, get_vaccinations_by_kinds,
+    get_vaccinations_by_pos_councils, health_check,
 };
 use actix_web::dev::Server;
 use actix_web::middleware::Logger;
@@ -24,6 +25,8 @@ pub fn run(listener: TcpListener, db_pool: MySqlPool) -> Result<Server, std::io:
             .wrap(Logger::default())
             .route("/health_check", web::get().to(health_check))
             // .route("/subscriptions", web::post().to(subscribe))
+            .route("/api/kinds", web::get().to(get_kinds))
+            .route("/api/regions", web::get().to(get_regions))
             .route(
                 "/api/analytics/animals/getAnimalCountByDistrict",
                 web::get().to(get_animal_count_by_district),
@@ -51,6 +54,10 @@ pub fn run(listener: TcpListener, db_pool: MySqlPool) -> Result<Server, std::io:
             .route(
                 "/api/analytics/enterprises/getEnterpriseCountByDistrict",
                 web::get().to(get_enterprise_count_by_district),
+            )
+            .route(
+                "/api/analytics/enterprises/getEnterpriseCountByType",
+                web::get().to(get_enterprise_count_by_type),
             )
             .route(
                 "/api/reports/getLivestockAgeGroupCountByDistricts",

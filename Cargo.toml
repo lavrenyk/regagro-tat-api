@@ -3,7 +3,7 @@
 authors = ["ārXāngēl <lavrenyk@gmail.com>"]
 edition = "2021"
 name = "zero2prod"
-version = "0.1.0"
+version = "0.1.25"
 
 [lib]
 path = "src/lib.rs"

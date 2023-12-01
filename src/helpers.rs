@@ -129,7 +129,7 @@ fn load_districts_data() -> Value {
     districts_data
 }
 
-fn load_json_file(name: &str) -> Value {
+pub fn load_json_file(name: &str) -> Value {
     //! СДЕЛАТЬ ПРОВЕРКУ ИМЕНИ ФАЙЛА!!!
     let file_path = format!("src/data/{}.json", name).to_owned();
     // Грузим данные из файла в переменную
