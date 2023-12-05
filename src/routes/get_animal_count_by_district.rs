@@ -1,7 +1,9 @@
 //! src/routes/api/analytics/animals/get_animal_count_by_district.rs
 #![allow(unused_assignments)]
 use crate::{
-    helpers::{all_districts_filter, district_filter_query, get_district_name_by_id},
+    helpers::{
+        all_districts_filter, district_filter_query, get_district_name_by_id, get_region_districts,
+    },
     structs::QueryData,
 };
 use actix_web::{web, HttpResponse};
@@ -9,6 +11,28 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{FromRow, MySqlPool};
 use uuid::Uuid;
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct SqlItemResponse {
+    id: u64,
+    district_code: String,
+    locality_code: String,
+    name: String,
+    count: i64,
+    krs_count: i32,
+    pig_count: i32,
+    goat_count: i32,
+    sheep_count: i32,
+    horse_count: i32,
+    bee_count: i32,
+    dog_count: i32,
+    cat_count: i32,
+    deer_count: i32,
+    maral_count: i32,
+    camel_count: i32,
+    donkey_count: i32,
+    bison_count: i32,
+}
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 struct ResponseItem {
@@ -32,13 +56,30 @@ struct ResponseItem {
 
 /// Generate response JSON with data for any asked district of amount animals
 /// with filtered by given period.
+///
+/// Алгоритм работы с данными по региону
+/// В работе нам потребуются следующие данные:
+/// - region_id (считываем в запросе)
+/// - region_guid (получаем из файла `src/data/regions`)
+/// - district_guids (отфильтрованный список GUID районов в виде строки значений через запятую)
+/// 1. Проверяем наличие в строке запроса указание региона. Если он не указан, то возвращаем ошибку
+/// и выходим из функции
+/// 2. Получаем region_guid через функцию `get_region_`
 pub async fn get_animal_count_by_district(
     data: web::Query<QueryData>,
     _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
     let _request_id = Uuid::new_v4();
 
-    // dbg!(&data);
+    let mut region_id: u32 = 0;
+    match data.region_id {
+        Some(data) => region_id = data,
+        None => {}
+    }
+    // Грузим данные по районам в регионе
+    let region_districts = get_region_districts(region_id).await;
+
+    dbg!(&region_districts);
 
     let mut districts_filter = "".to_string();
     match &data.districts {
@@ -68,6 +109,10 @@ pub async fn get_animal_count_by_district(
         None => (),
     }
 
+    // Грузим данные по районам в регионе
+    let region_districts = get_region_districts(region_id).await;
+
+    // Подготавливаем соединение с базой данных
     let connection =
         MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33633/regagro_3_0")
             .await;
@@ -75,7 +120,7 @@ pub async fn get_animal_count_by_district(
     let test_query = format!(
         r#"
         SELECT 
-            ea.id AS id,
+            ea.id AS id, ea.district_code, ea.locality_code,
             (CASE WHEN district_code IS NULL THEN locality_code ELSE district_code END) as name,
             COUNT(a.id) AS count,
             CAST( SUM(CASE WHEN `a`.`kind_id` = 1 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `krs_count`,
@@ -106,7 +151,10 @@ pub async fn get_animal_count_by_district(
         &districts_filter, &districts_filter, filter_date_from, filter_date_to
     );
 
-    let mut sql_response: Vec<ResponseItem> = vec![];
+    let mut sql_response: Vec<SqlItemResponse> = vec![];
+
+    // let region = HttpRequest::;
+    // dbg!(region);
 
     match connection {
         Err(err) => {
@@ -114,17 +162,18 @@ pub async fn get_animal_count_by_district(
         }
         Ok(pool) => {
             println!("Connected to database successfully.");
-            let result_all: Result<Vec<ResponseItem>, _> =
+            let result_all: Result<Vec<SqlItemResponse>, _> =
                 sqlx::query_as(&test_query).fetch_all(&pool).await;
             // dbg!(&result_all);
-            sql_response = result_all.unwrap();
+            sql_response = result_all.unwrap_or(vec![]);
         }
     }
 
     let mut response: Vec<ResponseItem> = vec![];
 
     for sql_item in sql_response {
-        let (id, name) = get_district_name_by_id(&sql_item.name);
+        let (id, name) = get_district_name_by_id(&region_districts, &sql_item.name);
+
         let response_item = ResponseItem {
             id: id.try_into().unwrap(),
             name,

@@ -1,6 +1,39 @@
+use reqwest::{self, Client};
+use serde_json::Value;
 use std::fs;
 
-use serde_json::Value;
+use crate::structs::ErrDistrictData;
+
+pub async fn get_region_districts(region_id: u32) -> Vec<ErrDistrictData> {
+    let mut region_districts: Vec<ErrDistrictData> = vec![];
+    let url = format!(
+        "https://err.regagro.net/api/regions/{}/districts",
+        region_id
+    );
+
+    //TODO: Сделать проверку токена
+    const ACCESS_TOKEN: &str = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzIiwianRpIjoiNTU3MjdjODFmZDY1NDkzYTQ5YzgwMjEwZTIzYTRjMzdkZjcxMWU2NDhiN2IyY2M5ZmMyOTkyMDNmYzk4MjZhNGJjNDgwOTI1Y2ZkMWY1YzUiLCJpYXQiOjE3MDE3MTM4ODYuODQwNzc1LCJuYmYiOjE3MDE3MTM4ODYuODQwNzgsImV4cCI6MTczMzMzNjI4Ni44Mjk1MTEsInN1YiI6IiIsInNjb3BlcyI6W119.YtH-GSYPuVouXNFJac4K4lQtUH8Emi5Gm8lCsuIuGLc4IpTSgsH9azLV9BOLKipMztrkmtdDVXQ_LqG1LUVs93b3HAyl_juUboX6zmUUw5EYy5cFIWiAjkREqS5eX_DPMpTmlriaQn30gHFmf6VZ6hIzqO1J66cPcOYe6833nebp0wm-1L18puC7H0aFhb1D-vSL3mmhelgvQ6mvQbhSNqvErkrwNpO6N1LM5a0Ox5qDgtAQWQeT-ZQdIw8OktFjop_n7ba9N1EFWuGFLfW5y0OEK4UiS-KxTnjf_oqPaG795XrPW2T-7rqfr6eiK3zrQrRch_4J1xSNLy1UU86i2Fgfi8ijpD29AVHqnIteFx7g42cqTH4xltkmG08G5IAZYkpTzJWHxmTvZCNXXfBTkLzhVjegW3H4mY23V8HPU6sDVRU3xdIW3rp7d8K8cjTrw68f6vC2HV9ahfl721kCYUHVn79x6W52DXQbVEQBGPh5e1nbWBAb1ocYKrgTzCh62TKN_2eiFqMXWdC0C-uy77H7lKsR-wL5GEIFCmdWgQmg-Y0Zvg9E2FHLH2L9G4WcQSF0DkJk9JNyYZyjVaX330O0jISNBry6LdyRBczNqhxAnY-S62YfYoBK13DYqI_hXwuCb_pvZiJpWlMNZTcbpBx28EAQ1i_liyOJXDCj2Mo";
+    // Создаем клиента для запроса данные о районах региона
+    let result = Client::new()
+        .get(url)
+        .bearer_auth(ACCESS_TOKEN)
+        .send()
+        .await
+        .unwrap()
+        .json::<Vec<ErrDistrictData>>()
+        .await;
+
+    match result {
+        Ok(json_data) => {
+            region_districts = json_data;
+        }
+        Err(err) => {
+            dbg!(err);
+        }
+    }
+
+    region_districts
+}
 
 pub fn animals_filter_query(animals: &str) -> String {
     let codes: Vec<&str> = animals.split(",").collect();
@@ -15,15 +48,12 @@ pub fn animals_filter_query(animals: &str) -> String {
     let object: Value = serde_json::from_str(contents).unwrap();
 
     for (i, code) in codes.iter().enumerate() {
-        // dbg!(&code);
         let mut regagro_code_v3: String = "".to_string();
         for i in 0..12 {
             if &object[i]["id"].as_str().unwrap() == code {
                 regagro_code_v3 = object[i]["regagro_code_v3"].as_str().unwrap().to_string();
             }
         }
-
-        // dbg!(&regagro_code_v3);
 
         if &regagro_code_v3 == "" {
             continue;
@@ -32,8 +62,6 @@ pub fn animals_filter_query(animals: &str) -> String {
         if i == 0 {
             query_filter = format!("a.kind_id='{}'", regagro_code_v3);
         } else {
-            // dbg!(regagro_code_v3);
-
             query_filter = format!("{} OR a.kind_id='{}'", query_filter, regagro_code_v3);
         }
     }
@@ -117,17 +145,17 @@ pub fn get_district_names(districts: &str) -> String {
     district_names
 }
 
-fn load_districts_data() -> Value {
-    let file_path = "src/data/districts.json".to_owned();
-    // Грузим данные из файла в переменную
-    let contents = fs::read_to_string(file_path).expect("Couldn't find or load that file.");
-    let contents = contents.as_str();
+// fn load_districts_data() -> Value {
+//     let file_path = "src/data/districts.json".to_owned();
+//     // Грузим данные из файла в переменную
+//     let contents = fs::read_to_string(file_path).expect("Couldn't find or load that file.");
+//     let contents = contents.as_str();
 
-    // переводим данные из файла в JSON
-    let districts_data: Value = serde_json::from_str(contents).unwrap();
+//     // переводим данные из файла в JSON
+//     let districts_data: Value = serde_json::from_str(contents).unwrap();
 
-    districts_data
-}
+//     districts_data
+// }
 
 pub fn load_json_file(name: &str) -> Value {
     //! СДЕЛАТЬ ПРОВЕРКУ ИМЕНИ ФАЙЛА!!!
@@ -142,16 +170,20 @@ pub fn load_json_file(name: &str) -> Value {
     json_data
 }
 
-pub fn get_district_name_by_id(district_guid: &str) -> (i64, String) {
-    let districts_data = load_districts_data();
+pub fn get_district_name_by_id(
+    region_districts: &Vec<ErrDistrictData>,
+    district_guid: &str,
+) -> (i64, String) {
+    // let districts_data = load_districts_data();
 
     let mut district_id = 0;
     let mut district_name = String::new();
 
-    for district in districts_data.as_array().unwrap() {
-        if district["guid"] == district_guid {
-            district_id = district["id"].as_i64().unwrap_or(0);
-            district_name = district["view"].as_str().unwrap().to_string();
+    for district in region_districts {
+        if district.guid == district_guid {
+            district_id = district.id;
+            district_name = district.name.to_owned();
+            break;
         }
     }
 

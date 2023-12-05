@@ -3162,7 +3162,7 @@ dependencies = [
 
 [[package]]
 name = "zero2prod"
-version = "0.1.25"
+version = "0.1.26"
 dependencies = [
  "actix-web",
  "async-std",

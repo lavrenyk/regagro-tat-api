@@ -8,7 +8,9 @@ use serde_json::json;
 use sqlx::{FromRow, MySqlPool};
 
 use crate::{
-    helpers::{all_districts_filter, district_filter_query, get_district_name_by_id},
+    helpers::{
+        all_districts_filter, district_filter_query, get_district_name_by_id, get_region_districts,
+    },
     structs::QueryData,
 };
 
@@ -43,6 +45,21 @@ pub async fn get_apiary_count_by_district(
     let mut date_from = String::from("2023-01-01");
     let mut date_to = String::from("2023-12-31");
     let mut districts = String::new();
+
+    let mut region_id: u32 = 0;
+    match data.region_id {
+        Some(data) => region_id = data,
+        None => {}
+    }
+    // Грузим данные по районам в регионе
+    let region_districts = get_region_districts(region_id).await;
+
+    match data.region_id {
+        Some(data) => {
+            region_id = data;
+        }
+        None => {}
+    }
 
     match &data.date_reg_from {
         // check date
@@ -146,7 +163,8 @@ pub async fn get_apiary_count_by_district(
     let mut response: Vec<ResponseItem> = vec![];
 
     for sql_item in sql_response {
-        let (id, name) = get_district_name_by_id(sql_item.district_code.as_str());
+        let (id, name) =
+            get_district_name_by_id(&region_districts, sql_item.district_code.as_str());
         let response_item = ResponseItem {
             id,
             name: name.as_str().to_string(),

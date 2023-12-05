@@ -10,7 +10,9 @@ use serde_json::json;
 use sqlx::{FromRow, MySqlPool};
 
 use crate::{
-    helpers::{all_districts_filter, district_filter_query, get_district_name_by_id},
+    helpers::{
+        all_districts_filter, district_filter_query, get_district_name_by_id, get_region_districts,
+    },
     structs::QueryData,
 };
 
@@ -36,10 +38,18 @@ pub async fn get_vaccinations_by_districts(
     _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
     //* Income data parse
+    let mut region_id: u32 = 0;
     let mut date_from = "2023-01-01".to_string();
     let mut date_to = "2023-12-31".to_string();
     let mut kind_ids = "1,2,3,4,5,6,7,8,9,10,11,12,13".to_string();
     let mut districts = "".to_string();
+
+    match data.region_id {
+        Some(data) => region_id = data,
+        None => {}
+    }
+    // Грузим данные по районам в регионе
+    let region_districts = get_region_districts(region_id).await;
 
     match &data.date_from {
         // check date
@@ -114,7 +124,7 @@ GROUP BY `ea`.`district_code`;"#,
     let mut response: Vec<ResponseItem> = vec![];
 
     for sql_item in sql_response {
-        let (id, name) = get_district_name_by_id(sql_item.id.as_str());
+        let (id, name) = get_district_name_by_id(&region_districts, sql_item.id.as_str());
         let response_item = ResponseItem {
             id,
             name: name.as_str().to_string(),
