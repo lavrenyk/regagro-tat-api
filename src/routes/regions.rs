@@ -25,7 +25,7 @@ pub async fn get_regions(data: web::Query<QueryData>) -> HttpResponse {
         Some(guid) => {
             for region in regions.as_array().unwrap() {
                 if &(region["guid"].as_str().unwrap().to_string()) == guid {
-                    json_response = json!([region.to_owned()]);
+                    json_response = json!(region.to_owned());
                 }
             }
         }

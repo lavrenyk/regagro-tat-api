@@ -1,14 +1,3 @@
-# FROM rust:1.73.0 as buider
-
-# WORKDIR /app
-# RUN apt update && apt install lld clang -y
-# COPY . .
-# ENV SQLX_OFFLINE true
-# RUN cargo build --release
-# ENV APP_ENVIRONMENT production
-
-# ENTRYPOINT ["./target/release/zero2prod"]
-
 FROM lukemathwalker/cargo-chef:latest-rust-1.73.0 as chef
 WORKDIR /app
 RUN apt update && apt install lld clang -y
@@ -40,7 +29,7 @@ RUN apt-get update -y \
     # Clean up
     && apt-get autoremove -y \
     && apt-get clean -y \
-    && rm -rf /var/lib/apt/lists/*»
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 # Copy the compiled binary from the builder environment 

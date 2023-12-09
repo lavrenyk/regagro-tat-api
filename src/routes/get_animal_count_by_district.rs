@@ -34,7 +34,7 @@ struct SqlItemResponse {
     bison_count: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Serialize, Deserialize)]
 struct ResponseItem {
     id: u64,
     name: String,
