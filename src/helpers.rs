@@ -217,3 +217,21 @@ pub fn get_kind_name_by_id(kind_id: &u64) -> (String, String) {
 
     (kind_name, kind_view)
 }
+
+/// Return `region_guid` by `id`
+pub fn get_region_guid(id: u32) -> String {
+    // set empty `region_guid`
+    let mut region_guid = String::new();
+
+    // Load regions data
+    let regions = load_json_file("regions");
+
+    // Try to fing region in regions data by `id` and return `region_guid`
+    for region in regions.as_array().unwrap() {
+        if (&region["id"]) == id {
+            region_guid = region["guid"].as_str().unwrap().to_string();
+        }
+    }
+
+    region_guid
+}

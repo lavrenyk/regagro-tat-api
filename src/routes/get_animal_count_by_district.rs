@@ -3,6 +3,7 @@
 use crate::{
     helpers::{
         all_districts_filter, district_filter_query, get_district_name_by_id, get_region_districts,
+        get_region_guid,
     },
     structs::QueryData,
 };
@@ -71,15 +72,21 @@ pub async fn get_animal_count_by_district(
 ) -> HttpResponse {
     let _request_id = Uuid::new_v4();
 
-    let mut region_id: u32 = 0;
-    match data.region_id {
-        Some(data) => region_id = data,
-        None => {}
-    }
+    // Обработчик входных параметров
+
+    //TODO: Перенести в общую функцию
+    // Обработка данных региона `id` и `guid`
+    let region_id: u32 = {
+        match data.region_id {
+            Some(data) => data,
+            None => 0,
+        }
+    };
+
+    let region_guid = get_region_guid(region_id);
+
     // Грузим данные по районам в регионе
     let region_districts = get_region_districts(region_id).await;
-
-    dbg!(&region_districts);
 
     let mut districts_filter = "".to_string();
     match &data.districts {
@@ -141,20 +148,17 @@ pub async fn get_animal_count_by_district(
         LEFT JOIN enterprises AS e ON ea.enterprise_id = e.id
         LEFT JOIN animals AS a ON e.id = a.enterprise_id
 
-        WHERE ea.region_code = "0c089b04-099e-4e0e-955a-6bf1ce525f1a" 
+        WHERE ea.region_code = "{}" 
         AND ea.district_code IN ({}) OR ea.locality_code IN ({})
         AND a.created_at > '{}'
         AND a.created_at < '{}'
 
         GROUP BY name
     "#,
-        &districts_filter, &districts_filter, filter_date_from, filter_date_to
+        &region_guid, &districts_filter, &districts_filter, filter_date_from, filter_date_to
     );
 
     let mut sql_response: Vec<SqlItemResponse> = vec![];
-
-    // let region = HttpRequest::;
-    // dbg!(region);
 
     match connection {
         Err(err) => {
