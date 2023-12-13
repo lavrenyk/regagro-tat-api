@@ -8,7 +8,7 @@ use serde_json::json;
 use sqlx::{FromRow, MySqlPool};
 
 use crate::{
-    helpers::{all_districts_filter, district_filter_query},
+    helpers::{all_districts_filter, district_filter_query, get_region_districts},
     structs::QueryData,
 };
 
@@ -55,12 +55,24 @@ pub async fn get_vaccinations_by_kinds(
         None => (),
     }
 
+    //TODO: Перенести проверку в функцию
+    // Обработка данных региона `id` и `guid`
+    let region_id: u32 = {
+        match data.region_id {
+            Some(data) => data,
+            None => 0,
+        }
+    };
+
+    // Грузим данные по районам в регионе
+    let region_districts = get_region_districts(region_id).await;
+
     match &data.enterprise_districts {
         Some(data_districts) => {
-            districts = district_filter_query(data_districts);
+            districts = district_filter_query(data_districts, &region_districts);
         }
         None => {
-            districts = all_districts_filter();
+            districts = all_districts_filter(&region_districts);
         }
     }
 

@@ -4,6 +4,7 @@ use std::fs;
 
 use crate::structs::ErrDistrictData;
 
+/// Загрузка списка объектов с данными районов принадлежащих региона
 pub async fn get_region_districts(region_id: u32) -> Vec<ErrDistrictData> {
     let mut region_districts: Vec<ErrDistrictData> = vec![];
     let url = format!(
@@ -69,46 +70,45 @@ pub fn animals_filter_query(animals: &str) -> String {
     query_filter
 }
 
-pub fn district_filter_query(districts: &str) -> String {
-    let codes: Vec<&str> = districts.split(",").collect();
-    let mut query_filter = "".to_string();
-    let file_path = "src/data/districts.json".to_owned();
-
-    // Грузим данные из файла в переменную
-    let contents = fs::read_to_string(file_path).expect("Couldn't find or load that file.");
-    let contents = contents.as_str();
-
-    // переводим в JSON
-    let object: Value = serde_json::from_str(contents).unwrap();
+pub fn district_filter_query(
+    districts_ids: &str,
+    region_districts: &Vec<ErrDistrictData>,
+) -> String {
+    let codes: Vec<&str> = districts_ids.split(",").collect();
+    let mut query_filter = String::new();
 
     for (i, code) in codes.iter().enumerate() {
         // получаем guid дистрикта
-        let mut guid = "".to_string();
-        for i in 0..44 {
-            if object[i]["id"] == code.parse::<i64>().unwrap() {
-                guid = object[i]["guid"].to_string();
+        let mut district_guid = String::new();
+        // Try to fing district in regions data by `id` and return `district_guid`
+        for district in region_districts {
+            if district.id == code.parse().unwrap_or(0) {
+                district_guid = district.guid.clone();
             }
         }
 
-        // Обрезаем кавычки
-        let guid: &str = &guid.as_str()[1..guid.len() - 1];
-
         if i == 0 {
-            query_filter = format!("'{}'", guid);
+            query_filter = format!("'{}'", district_guid);
         } else {
-            query_filter = format!("{}, '{}'", query_filter, guid);
+            query_filter = format!("{}, '{}'", query_filter, district_guid);
         }
     }
 
     query_filter
 }
 
-pub fn all_districts_filter() -> String {
-    let mut all_districts = "264".to_string();
-    for i in 265..305 {
-        all_districts = format!("{},{}", all_districts, i);
+pub fn all_districts_filter(region_districts: &Vec<ErrDistrictData>) -> String {
+    let mut districts_guid = String::new();
+
+    for district in region_districts {
+        if districts_guid.len() > 0 {
+            districts_guid = format!("{}, '{}'", districts_guid, district.guid);
+        } else {
+            districts_guid = format!("'{}'", district.guid);
+        }
     }
-    district_filter_query(all_districts.as_str())
+
+    districts_guid
 }
 
 pub fn get_district_names(districts: &str) -> String {
@@ -144,18 +144,6 @@ pub fn get_district_names(districts: &str) -> String {
 
     district_names
 }
-
-// fn load_districts_data() -> Value {
-//     let file_path = "src/data/districts.json".to_owned();
-//     // Грузим данные из файла в переменную
-//     let contents = fs::read_to_string(file_path).expect("Couldn't find or load that file.");
-//     let contents = contents.as_str();
-
-//     // переводим данные из файла в JSON
-//     let districts_data: Value = serde_json::from_str(contents).unwrap();
-
-//     districts_data
-// }
 
 pub fn load_json_file(name: &str) -> Value {
     //! СДЕЛАТЬ ПРОВЕРКУ ИМЕНИ ФАЙЛА!!!

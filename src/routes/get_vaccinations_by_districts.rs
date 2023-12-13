@@ -38,16 +38,19 @@ pub async fn get_vaccinations_by_districts(
     _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
     //* Income data parse
-    let mut region_id: u32 = 0;
     let mut date_from = "2023-01-01".to_string();
     let mut date_to = "2023-12-31".to_string();
     let mut kind_ids = "1,2,3,4,5,6,7,8,9,10,11,12,13".to_string();
     let mut districts = "".to_string();
 
-    match data.region_id {
-        Some(data) => region_id = data,
-        None => {}
-    }
+    //TODO: Перенести проверку в функцию
+    // Обработка данных региона `id` и `guid`
+    let region_id: u32 = {
+        match data.region_id {
+            Some(data) => data,
+            None => 0,
+        }
+    };
     // Грузим данные по районам в регионе
     let region_districts = get_region_districts(region_id).await;
 
@@ -75,10 +78,10 @@ pub async fn get_vaccinations_by_districts(
 
     match &data.enterprise_districts {
         Some(data_districts) => {
-            districts = district_filter_query(data_districts);
+            districts = district_filter_query(data_districts, &region_districts);
         }
         None => {
-            districts = all_districts_filter();
+            districts = all_districts_filter(&region_districts);
         }
     }
 

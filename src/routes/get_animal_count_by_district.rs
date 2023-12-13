@@ -8,6 +8,7 @@ use crate::{
     structs::QueryData,
 };
 use actix_web::{web, HttpResponse};
+use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{FromRow, MySqlPool};
@@ -16,8 +17,8 @@ use uuid::Uuid;
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 struct SqlItemResponse {
     id: u64,
-    district_code: String,
-    locality_code: String,
+    district_code: Option<String>,
+    locality_code: Option<String>,
     name: String,
     count: i64,
     krs_count: i32,
@@ -74,7 +75,7 @@ pub async fn get_animal_count_by_district(
 
     // Обработчик входных параметров
 
-    //TODO: Перенести в общую функцию
+    //TODO: Перенести проверку в функцию
     // Обработка данных региона `id` и `guid`
     let region_id: u32 = {
         match data.region_id {
@@ -83,38 +84,34 @@ pub async fn get_animal_count_by_district(
         }
     };
 
-    let region_guid = get_region_guid(region_id);
+    let region_guid = get_region_guid(region_id); // получаем GUID региона
 
     // Грузим данные по районам в регионе
     let region_districts = get_region_districts(region_id).await;
 
-    let mut districts_filter = "".to_string();
-    match &data.districts {
-        Some(data) => {
-            districts_filter = district_filter_query(&data.as_str());
-            // districts = data.to_string();
+    // Получаем список GUID районов, для дальнейшего запроса в БД
+    let districts_filter: String = {
+        match &data.districts {
+            Some(data) => district_filter_query(&data.as_str(), &region_districts),
+            None => all_districts_filter(&region_districts),
         }
-        None => {
-            districts_filter = all_districts_filter();
-        }
-    }
+    };
 
-    let mut filter_date_from = "2023-01-01".to_string();
-    let mut filter_date_to = "2023-12-31".to_string();
+    dbg!(&districts_filter);
 
-    match &data.date_reg_from {
-        Some(date_from) => {
-            filter_date_from = date_from.to_string();
+    let date_from: String = {
+        match &data.date_reg_from {
+            Some(date_from) => date_from.to_string(),
+            None => "2023-01-01".to_string(),
         }
-        None => (),
-    }
+    };
 
-    match &data.date_reg_to {
-        Some(date_to) => {
-            filter_date_to = date_to.to_string();
+    let date_to: String = {
+        match &data.date_reg_to {
+            Some(date_to) => date_to.to_string(),
+            None => Local::now().format("%Y-%m-%d").to_string(),
         }
-        None => (),
-    }
+    };
 
     // Грузим данные по районам в регионе
     let region_districts = get_region_districts(region_id).await;
@@ -132,8 +129,8 @@ pub async fn get_animal_count_by_district(
             COUNT(a.id) AS count,
             CAST( SUM(CASE WHEN `a`.`kind_id` = 1 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `krs_count`,
             CAST( SUM(CASE WHEN `a`.`kind_id` = 2 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `pig_count`,
-            CAST( SUM(CASE WHEN `a`.`kind_id` = 12 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `goat_count`,
-            CAST( SUM(CASE WHEN `a`.`kind_id` = 13 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `sheep_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 13 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `goat_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 12 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `sheep_count`,
             CAST( SUM(CASE WHEN `a`.`kind_id` = 3 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `horse_count`,
             CAST( SUM(CASE WHEN `a`.`kind_id` = 4 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `bee_count`,
             CAST( SUM(CASE WHEN `a`.`kind_id` = 5 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `dog_count`,
@@ -147,15 +144,16 @@ pub async fn get_animal_count_by_district(
         FROM enterprise_addresses AS ea
         LEFT JOIN enterprises AS e ON ea.enterprise_id = e.id
         LEFT JOIN animals AS a ON e.id = a.enterprise_id
+        
+        AND a.created_at >= '{}'
+        AND a.created_at <= '{}'
 
         WHERE ea.region_code = "{}" 
         AND ea.district_code IN ({}) OR ea.locality_code IN ({})
-        AND a.created_at > '{}'
-        AND a.created_at < '{}'
 
         GROUP BY name
     "#,
-        &region_guid, &districts_filter, &districts_filter, filter_date_from, filter_date_to
+        &date_from, &date_to, &region_guid, &districts_filter, &districts_filter
     );
 
     let mut sql_response: Vec<SqlItemResponse> = vec![];

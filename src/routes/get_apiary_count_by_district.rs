@@ -78,10 +78,10 @@ pub async fn get_apiary_count_by_district(
 
     match &data.districts {
         Some(data_districts) => {
-            districts = district_filter_query(data_districts);
+            districts = district_filter_query(data_districts, &region_districts);
         }
         None => {
-            districts = all_districts_filter();
+            districts = all_districts_filter(&region_districts);
         }
     }
 
