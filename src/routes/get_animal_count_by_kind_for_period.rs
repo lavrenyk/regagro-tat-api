@@ -45,6 +45,15 @@ pub async fn get_animal_count_by_kind_for_period(
 
     // ЭТАП 1: Переформатируем QueryData в необходимые данные для работы
 
+    //TODO: Перенести проверку в функцию
+    // Обработка данных региона `id` и `guid`
+    let region_id: u32 = {
+        match data.region_id {
+            Some(data) => data,
+            None => 16,
+        }
+    };
+
     let mut date_from = "2023-01-01".to_string();
     let mut date_to = "2023-12-31".to_string();
     let mut kind_ids = "".to_string();

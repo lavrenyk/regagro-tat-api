@@ -1,6 +1,6 @@
 //! src/routes/api/analytics/animals/get_animal_by_kind.rs
 #![allow(unused_assignments)]
-use crate::helpers::{get_all_kind_ids, get_kind_name_by_id};
+use crate::helpers::{get_all_kind_ids, get_kind_name_by_id, get_region_guid};
 use crate::structs::QueryData;
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
@@ -46,6 +46,17 @@ pub async fn get_animal_count_by_kind(
     // ЭТАП 1: Переформатируем QueryData в необходимые данные для работы
     let kind_ids = get_all_kind_ids();
 
+    //TODO: Перенести проверку в функцию
+    // Обработка данных региона `id` и `guid`
+    let region_id: u32 = {
+        match data.region_id {
+            Some(data) => data,
+            None => 0,
+        }
+    };
+
+    let region_guid = get_region_guid(region_id); // получаем GUID региона
+
     // ЭТАП 2: Запрашиваем информацию из БД
     let sql_query = format!(
         r#"SELECT 
@@ -56,11 +67,11 @@ pub async fn get_animal_count_by_kind(
         LEFT JOIN enterprises AS e ON a.enterprise_id = e.id
         LEFT JOIN enterprise_addresses AS ea ON e.id = ea.enterprise_id
 
-        WHERE ea.region_code = "0c089b04-099e-4e0e-955a-6bf1ce525f1a" 
+        WHERE ea.region_code = "{}" 
         AND a.kind_id IN ({})
 
         GROUP BY a.kind_id"#,
-        kind_ids
+        region_guid, kind_ids
     );
 
     let connection =
@@ -77,7 +88,6 @@ pub async fn get_animal_count_by_kind(
             println!("Connected to database successfully.");
             let result_all: Result<Vec<SqlResponse>, _> =
                 sqlx::query_as(&sql_query).fetch_all(&pool).await;
-            dbg!(&result_all);
             sql_response = result_all.unwrap();
         }
     }

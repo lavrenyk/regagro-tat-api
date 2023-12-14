@@ -97,8 +97,6 @@ pub async fn get_animal_count_by_district(
         }
     };
 
-    dbg!(&districts_filter);
-
     let date_from: String = {
         match &data.date_reg_from {
             Some(date_from) => date_from.to_string(),
@@ -113,8 +111,8 @@ pub async fn get_animal_count_by_district(
         }
     };
 
-    // Грузим данные по районам в регионе
-    let region_districts = get_region_districts(region_id).await;
+    // // Грузим данные по районам в регионе
+    // let region_districts = get_region_districts(region_id).await;
 
     // Подготавливаем соединение с базой данных
     let connection =
