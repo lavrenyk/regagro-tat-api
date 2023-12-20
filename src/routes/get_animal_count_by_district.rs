@@ -71,7 +71,11 @@ pub async fn get_animal_count_by_district(
     data: web::Query<QueryData>,
     _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
-    let _request_id = Uuid::new_v4();
+    let request_id = Uuid::new_v4();
+    let _request_span = tracing::info_span!(
+        "Requesting animals in region by district",
+        %request_id,
+    );
 
     // Обработчик входных параметров
 

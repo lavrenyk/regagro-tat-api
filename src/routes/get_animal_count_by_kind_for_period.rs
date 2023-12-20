@@ -1,8 +1,9 @@
 //! src/routes/api/analytics/animals/get_animal_by_kind_for_period.rs
 #![allow(unused_assignments)]
-use crate::helpers::{get_all_kind_ids, get_kind_name_by_id};
+use crate::helpers::{get_all_kind_ids, get_kind_name_by_id, get_region_guid};
 use crate::structs::QueryData;
 use actix_web::{web, HttpResponse};
+use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{FromRow, MySqlPool};
@@ -40,9 +41,6 @@ pub async fn get_animal_count_by_kind_for_period(
     _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
     let _request_id = Uuid::new_v4();
-
-    dbg!(&data);
-
     // ЭТАП 1: Переформатируем QueryData в необходимые данные для работы
 
     //TODO: Перенести проверку в функцию
@@ -54,33 +52,28 @@ pub async fn get_animal_count_by_kind_for_period(
         }
     };
 
-    let mut date_from = "2023-01-01".to_string();
-    let mut date_to = "2023-12-31".to_string();
-    let mut kind_ids = "".to_string();
+    let region_guid = get_region_guid(region_id); // получаем GUID региона
 
-    match &data.date_reg_from {
-        // check date
-        Some(data_date_from) => {
-            date_from = data_date_from.to_string();
+    let date_from: String = {
+        match &data.date_reg_from {
+            Some(date_from) => date_from.to_string(),
+            None => "2023-01-01".to_string(),
         }
-        None => (),
-    }
+    };
 
-    match &data.date_reg_to {
-        Some(data_date_to) => {
-            date_to = data_date_to.to_string();
+    let date_to: String = {
+        match &data.date_reg_to {
+            Some(date_to) => date_to.to_string(),
+            None => Local::now().format("%Y-%m-%d").to_string(),
         }
-        None => (),
-    }
+    };
 
-    match &data.kinds {
-        Some(data_kinds) => {
-            kind_ids = data_kinds.to_string();
+    let kind_ids: String = {
+        match &data.kinds {
+            Some(data_kinds) => data_kinds.to_string(),
+            None => get_all_kind_ids(),
         }
-        None => {
-            kind_ids = get_all_kind_ids();
-        }
-    }
+    };
 
     // ЭТАП 2: Запрашиваем информацию из БД
     let sql_query = format!(
@@ -92,13 +85,13 @@ pub async fn get_animal_count_by_kind_for_period(
         LEFT JOIN enterprises AS e ON a.enterprise_id = e.id
         LEFT JOIN enterprise_addresses AS ea ON e.id = ea.enterprise_id
 
-        WHERE ea.region_code = "0c089b04-099e-4e0e-955a-6bf1ce525f1a" 
+        WHERE ea.region_code = "{}" 
         AND a.kind_id IN ({})
         AND a.created_at >= '{}'
         AND a.created_at <= '{}'
 
         GROUP BY a.kind_id"#,
-        kind_ids, date_from, date_to
+        region_guid, kind_ids, date_from, date_to
     );
 
     let connection =

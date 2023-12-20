@@ -39,9 +39,13 @@ pub async fn get_animal_count_by_kind(
     data: web::Query<QueryData>,
     _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
-    let _request_id = Uuid::new_v4();
+    let request_id = Uuid::new_v4();
+    let request_span = tracing::info_span!(
+        "Requesting animals count in region by kind",
+        %request_id,
+    );
 
-    dbg!(&data);
+    let _request_span_guard = request_span.enter();
 
     // ЭТАП 1: Переформатируем QueryData в необходимые данные для работы
     let kind_ids = get_all_kind_ids();
@@ -85,7 +89,6 @@ pub async fn get_animal_count_by_kind(
             println!("Cannot connect to database [{}]", err.to_string());
         }
         Ok(pool) => {
-            println!("Connected to database successfully.");
             let result_all: Result<Vec<SqlResponse>, _> =
                 sqlx::query_as(&sql_query).fetch_all(&pool).await;
             sql_response = result_all.unwrap();
