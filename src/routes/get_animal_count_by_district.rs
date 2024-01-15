@@ -104,7 +104,7 @@ pub async fn get_animal_count_by_district(
     let date_from: String = {
         match &data.date_reg_from {
             Some(date_from) => date_from.to_string(),
-            None => "2023-01-01".to_string(),
+            None => "2020-01-01".to_string(),
         }
     };
 
@@ -120,10 +120,10 @@ pub async fn get_animal_count_by_district(
 
     // Подготавливаем соединение с базой данных
     let connection =
-        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33633/regagro_3_0")
+        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33636/regagro_3_0")
             .await;
 
-    let test_query = format!(
+    let sql_query = format!(
         r#"
         SELECT 
             ea.id AS id, ea.district_code, ea.locality_code,
@@ -167,7 +167,7 @@ pub async fn get_animal_count_by_district(
         Ok(pool) => {
             println!("Connected to database successfully.");
             let result_all: Result<Vec<SqlItemResponse>, _> =
-                sqlx::query_as(&test_query).fetch_all(&pool).await;
+                sqlx::query_as(&sql_query).fetch_all(&pool).await;
             // dbg!(&result_all);
             sql_response = result_all.unwrap_or(vec![]);
         }

@@ -195,8 +195,6 @@ pub fn get_kind_name_by_id(kind_id: &u64) -> (String, String) {
     let mut kind_view = String::new();
 
     for animal in animals_json_data.as_array().unwrap() {
-        dbg!(&animal["id"]).as_u64();
-        dbg!(&kind_id.to_string().as_str());
         if &(animal["id"]).as_u64().unwrap() == kind_id {
             kind_name = animal["name"].as_str().unwrap().to_string();
             kind_view = animal["view"].as_str().unwrap().to_string();

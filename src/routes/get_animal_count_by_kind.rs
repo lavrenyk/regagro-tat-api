@@ -63,7 +63,8 @@ pub async fn get_animal_count_by_kind(
 
     // ЭТАП 2: Запрашиваем информацию из БД
     let sql_query = format!(
-        r#"SELECT 
+        r#"
+        SELECT 
         CAST(a.kind_id AS UNSIGNED) AS kind_id, 
         CAST(COUNT(a.id) AS UNSIGNED) AS count
 
@@ -74,12 +75,13 @@ pub async fn get_animal_count_by_kind(
         WHERE ea.region_code = "{}" 
         AND a.kind_id IN ({})
 
-        GROUP BY a.kind_id"#,
+        GROUP BY a.kind_id
+        "#,
         region_guid, kind_ids
     );
 
     let connection =
-        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33633/regagro_3_0")
+        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33636/regagro_3_0")
             .await;
 
     let mut sql_response: Vec<SqlResponse> = vec![];

@@ -8,7 +8,7 @@ use serde_json::json;
 use sqlx::{FromRow, MySqlPool};
 
 use crate::{
-    helpers::{all_districts_filter, district_filter_query, get_region_districts},
+    helpers::{all_districts_filter, district_filter_query, get_region_districts, get_region_guid},
     structs::QueryData,
 };
 
@@ -29,8 +29,8 @@ pub async fn get_vaccinations_by_kinds(
     //* Income data parse
     dbg!(&data);
 
-    let mut date_from = "2023-01-01".to_string();
-    let mut date_to = "2023-12-31".to_string();
+    let mut date_from = "2020-01-01".to_string();
+    let mut date_to = "2024-12-31".to_string();
     let mut kind_ids = "1,2,3,4,5,6,7,8,9,10,11,12,13".to_string();
     let mut districts = String::new();
 
@@ -64,6 +64,8 @@ pub async fn get_vaccinations_by_kinds(
         }
     };
 
+    let region_guid = get_region_guid(region_id); // получаем GUID региона
+
     // Грузим данные по районам в регионе
     let region_districts = get_region_districts(region_id).await;
 
@@ -91,21 +93,21 @@ LEFT JOIN `regagro_3_0`.`enterprise_addresses` as `ea` ON `ea`.`enterprise_id` =
 LEFT JOIN `regagro_3_0_handbooks`.`kinds` as `k` ON `k`.`id` = `a`.`kind_id`
 WHERE `v`.`is_super_group` = 0
 /*Даты от и до */
-AND `v`.`date` >= "{}" AND `v`.`date` <= "{}"
+AND `v`.`date` >= '{}' AND `v`.`date` <= '{}'
 /*Код региона*/
-AND `ea`.`region_code` = "0c089b04-099e-4e0e-955a-6bf1ce525f1a"
+AND `ea`.`region_code` = '{}'
 /*Коды районов*/
 AND `ea`.`district_code` IN ({})
 /*Виды животных*/
 AND `a`.`kind_id` IN ({})
 GROUP BY `k`.`id`;
     "#,
-        date_from, date_to, districts, kind_ids
+        date_from, date_to, region_guid, districts, kind_ids
     );
 
     let mut response: Vec<ResponseItem> = vec![];
     let connection =
-        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33633/regagro_3_0")
+        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33636/regagro_3_0")
             .await;
 
     match connection {

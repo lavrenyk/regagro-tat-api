@@ -56,7 +56,7 @@ pub async fn get_disposal_count_by_district(
     let date_from: String = {
         match &data.date_reg_from {
             Some(date_from) => date_from.to_string(),
-            None => "2023-01-01".to_string(),
+            None => "2020-01-01".to_string(),
         }
     };
 
@@ -69,7 +69,7 @@ pub async fn get_disposal_count_by_district(
 
     // Подготавливаем соединение с базой данных
     let connection =
-        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33633").await;
+        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33636").await;
 
     let query = format!(
         r#"

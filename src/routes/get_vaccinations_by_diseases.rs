@@ -3,6 +3,7 @@
 #![allow(unused_assignments)]
 
 use actix_web::{web, HttpResponse};
+use chrono::Local;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{FromRow, MySqlPool};
@@ -24,25 +25,33 @@ pub async fn get_vaccinations_by_diseases(
     _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
     //* Income data parse
-    let mut date_from = "2023-01-01".to_string();
-    let mut date_to = "2023-12-31".to_string();
     let mut kind_ids = "1,2,3,4,5,6,7,8,9,10,11,12,13".to_string();
     let mut districts = "".to_string();
 
-    match &data.date_from {
-        // check date
-        Some(data_date_from) => {
-            date_from = data_date_from.to_string();
+    //TODO: Перенести проверку в функцию
+    // Обработка данных региона `id` и `guid`
+    let region_id: u32 = {
+        match data.region_id {
+            Some(data) => data,
+            None => 0,
         }
-        None => (),
-    }
+    };
 
-    match &data.date_to {
-        Some(data_date_to) => {
-            date_to = data_date_to.to_string();
+    let region_guid = get_region_guid(region_id); // получаем GUID региона
+
+    let date_from: String = {
+        match &data.date_from {
+            Some(date_from) => date_from.to_string(),
+            None => "2020-01-01".to_string(),
         }
-        None => (),
-    }
+    };
+
+    let date_to: String = {
+        match &data.date_to {
+            Some(date_to) => date_to.to_string(),
+            None => Local::now().format("%Y-%m-%d").to_string(),
+        }
+    };
 
     match &data.kind_ids {
         Some(data_kind_ids) => {
@@ -86,17 +95,17 @@ LEFT JOIN `regagro_3_0`.`enterprises` as `e` ON `v`.`enterprise_id` = `e`.`id`
 LEFT JOIN `regagro_3_0`.`enterprise_addresses` as `ea` ON `ea`.`enterprise_id` = `e`.`id`
 LEFT JOIN `regagro_3_0_handbooks`.`diseases` as `d` ON `d`.`id` = `vd`.`disease_id`
 WHERE `v`.`is_super_group` = 0 
-AND `v`.`date` >= "{}" AND `v`.`date` <= "{}"
-AND `ea`.`region_code` = "0c089b04-099e-4e0e-955a-6bf1ce525f1a"
+AND `v`.`date` >= '{}' AND `v`.`date` <= '{}'
+AND `ea`.`region_code` = '{}'
 AND `ea`.`district_code` IN ({})
 AND `a`.`kind_id` IN ({})
 GROUP BY `d`.`id`;"#,
-        date_from, date_to, districts, kind_ids
+        date_from, date_to, region_guid, districts, kind_ids
     );
 
     let mut response: Vec<ResponseItem> = vec![];
     let connection =
-        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33633/regagro_3_0")
+        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33636/regagro_3_0")
             .await;
 
     match connection {

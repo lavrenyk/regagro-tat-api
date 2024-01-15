@@ -59,7 +59,7 @@ pub async fn get_apiary_count_by_district(
     let date_from: String = {
         match &data.date_reg_from {
             Some(date_from) => date_from.to_string(),
-            None => "2023-01-01".to_string(),
+            None => "2020-01-01".to_string(),
         }
     };
 
@@ -111,7 +111,7 @@ pub async fn get_apiary_count_by_district(
 
     let mut sql_response: Vec<SqlResponse> = vec![];
     let connection =
-        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33633/regagro_3_0")
+        MySqlPool::connect("mysql://mp_analytic:8Nlr7fDQNwmniu6h@vo.regagro.ru:33636/regagro_3_0")
             .await;
 
     match connection {
