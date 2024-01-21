@@ -3,20 +3,27 @@
 
 use actix_web::{web, HttpResponse};
 use chrono::Local;
-use serde_json::json;
-use sqlx::MySqlPool;
+use serde::{Deserialize, Serialize};
+use sqlx::{FromRow, MySqlPool};
 
 use crate::{
     helpers::{all_districts_filter, district_filter_query, get_region_districts, get_region_guid},
     structs::QueryData,
 };
 
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+struct SqlItemResponse {
+    id: u64,
+    name: String,
+    count: i64,
+    public_sector_count: i64,
+    private_sector_count: i64,
+}
+
 pub async fn get_disposal_count_by_reason(
     data: web::Query<QueryData>,
     _pool: web::Data<MySqlPool>,
 ) -> HttpResponse {
-    let json_response = json!([]);
-
     // Parse the region ID
     let region_id: u32 = {
         match data.region_id {
@@ -60,9 +67,9 @@ pub async fn get_disposal_count_by_reason(
     let sql_query = format!(
         r#"
         SELECT dr.id as id, dr.name as name, 
-        SUM(da.count) as count,
-        CAST( SUM(CASE WHEN o.legal_form_id IN (1,3,4) THEN da.count ELSE 0 END) AS UNSIGNED) as public_sector_count,
-        CAST( SUM(CASE WHEN o.legal_form_id = 2 THEN 1 ELSE da.count END) AS UNSIGNED) as private_sector_count
+        CAST( SUM(da.count) AS INTEGER) as count,
+        CAST( SUM(CASE WHEN o.legal_form_id IN (1,3,4) THEN da.count ELSE 0 END) AS INTEGER) as public_sector_count,
+        CAST( SUM(CASE WHEN o.legal_form_id = 2 THEN 1 ELSE da.count END) AS INTEGER) as private_sector_count
 
         FROM regagro_3_0.disposal_list_animals as da
         LEFT JOIN regagro_3_0.animals as a ON da.animal_id = a.id
@@ -71,17 +78,32 @@ pub async fn get_disposal_count_by_reason(
         LEFT JOIN regagro_3_0.enterprise_addresses as ea ON ea.enterprise_id = e.id
         LEFT JOIN regagro_3_0.disposal_lists as dl on dl.id = da.disposal_list_id
         LEFT JOIN regagro_3_0_handbooks.disposal_reasons as dr on dl.disposal_reason_id = dr.id
-LEFT JOIN `regagro_3_0`.`owners` as `o` ON `e`.`owner_id` = `o`.`id`
-WHERE `a`.`is_super_group` = 0 AND `dl`.`disposal_status_id` = 2
-AND `dl`.`activated_at` >= "{}" AND `dl`.`activated_at` <= "{}"
-AND `ea`.`region_code` = "{}"
-AND `ea`.`district_code` IN ({})
-GROUP BY `dr`.`id`;
+        LEFT JOIN `regagro_3_0`.`owners` as `o` ON `e`.`owner_id` = `o`.`id`
+
+        WHERE `a`.`is_super_group` = 0 AND `dl`.`disposal_status_id` = 2
+        AND `dl`.`activated_at` >= "{}" AND `dl`.`activated_at` <= "{}"
+        AND `ea`.`region_code` = "{}"
+        AND `ea`.`district_code` IN ({})
+        GROUP BY `dr`.`id`;
     "#,
         &date_from, &date_to, &region_guid, &districts_filter
     );
 
+    let mut sql_response: Vec<SqlItemResponse> = vec![];
+
+    match connection {
+        Err(err) => {
+            println!("Cannot connect to database [{}]", err.to_string());
+        }
+        Ok(pool) => {
+            println!("Connected to database successfully.");
+            let result_all: Result<Vec<SqlItemResponse>, _> =
+                sqlx::query_as(&sql_query).fetch_all(&pool).await;
+            sql_response = result_all.unwrap_or(vec![]);
+        }
+    }
+
     HttpResponse::Ok()
         .content_type("application/json")
-        .json(json_response)
+        .json(sql_response)
 }

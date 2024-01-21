@@ -87,7 +87,13 @@ pub async fn get_enterprise_count_by_district(
 
     let districts_guids: String = {
         match &data.districts {
-            Some(data) => data.to_string(),
+            Some(data) => {
+                if data.len() > 0 {
+                    data.to_string()
+                } else {
+                    all_districts_filter(&region_districts)
+                }
+            }
             None => all_districts_filter(&region_districts),
         }
     };

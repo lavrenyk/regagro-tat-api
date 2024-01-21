@@ -131,8 +131,8 @@ pub async fn get_animal_count_by_district(
             COUNT(a.id) AS count,
             CAST( SUM(CASE WHEN `a`.`kind_id` = 1 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `krs_count`,
             CAST( SUM(CASE WHEN `a`.`kind_id` = 2 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `pig_count`,
-            CAST( SUM(CASE WHEN `a`.`kind_id` = 13 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `goat_count`,
-            CAST( SUM(CASE WHEN `a`.`kind_id` = 12 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `sheep_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 12 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `goat_count`,
+            CAST( SUM(CASE WHEN `a`.`kind_id` = 13 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `sheep_count`,
             CAST( SUM(CASE WHEN `a`.`kind_id` = 3 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `horse_count`,
             CAST( SUM(CASE WHEN `a`.`kind_id` = 4 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `bee_count`,
             CAST( SUM(CASE WHEN `a`.`kind_id` = 5 THEN `a`.`count` ELSE 0 END) AS INTEGER) as `dog_count`,
@@ -159,6 +159,8 @@ pub async fn get_animal_count_by_district(
     );
 
     let mut sql_response: Vec<SqlItemResponse> = vec![];
+
+    dbg!(&districts_filter);
 
     match connection {
         Err(err) => {
