@@ -69,7 +69,7 @@ pub async fn get_disposal_count_by_reason(
         SELECT dr.id as id, dr.name as name, 
         CAST( SUM(da.count) AS INTEGER) as count,
         CAST( SUM(CASE WHEN o.legal_form_id IN (1,3,4) THEN da.count ELSE 0 END) AS INTEGER) as public_sector_count,
-        CAST( SUM(CASE WHEN o.legal_form_id = 2 THEN 1 ELSE da.count END) AS INTEGER) as private_sector_count
+        CAST( SUM(CASE WHEN o.legal_form_id = 2 THEN 1 ELSE da.count - 1 END) AS INTEGER) as private_sector_count
 
         FROM regagro_3_0.disposal_list_animals as da
         LEFT JOIN regagro_3_0.animals as a ON da.animal_id = a.id
