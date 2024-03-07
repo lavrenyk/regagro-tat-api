@@ -101,6 +101,8 @@ pub async fn get_animal_count_by_kind_for_period(
         WHERE ea.region_code = "{}" 
         AND ea.district_code IN ({}) OR ea.locality_code IN ({})
         AND a.kind_id IN ({})
+        AND a.is_super_group=0
+        AND a.deleted_at is null
         AND a.created_at >= '{}'
         AND a.created_at <= '{}'
 
