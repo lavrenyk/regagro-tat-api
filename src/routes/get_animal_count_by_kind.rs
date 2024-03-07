@@ -74,6 +74,8 @@ pub async fn get_animal_count_by_kind(
 
         WHERE ea.region_code = "{}" 
         AND a.kind_id IN ({})
+        AND a.is_super_group=0
+        AND a.deleted_at is null
 
         GROUP BY a.kind_id
         "#,
